@@ -1,0 +1,39 @@
+<!-- /hr_leaves/views/hr_leaves_menus.xml -->
+<odoo>
+    <data>
+        <!-- Main HR Leaves Menu -->
+        <menuitem
+            id="menu_hr_leaves_root"
+            name="HR Leaves"
+            sequence="10"
+            groups="hr_management.group_hr_management_user"/>
+
+        <!-- Requests Section -->
+        <menuitem
+            id="menu_hr_leaves_my_requests"
+            name="Leave Requests"
+            parent="menu_hr_leaves_root"
+            action="hr_leaves_request_action"
+            sequence="1"/>
+        <menuitem
+            id="menu_hr_leaves_allocations"
+            name="Allocations Requests"
+            parent="menu_hr_leaves_root"
+            action="hr_leaves_allocation_action"
+            sequence="2"/>
+
+        <!-- Configuration Section -->
+        <menuitem
+            id="menu_hr_leaves_config"
+            name="Configuration"
+            parent="menu_hr_leaves_root"
+            sequence="100"
+            groups="hr_management.group_hr_management_user"/>
+        <menuitem
+            id="menu_hr_leaves_types"
+            name="Time Off Types"
+            parent="menu_hr_leaves_config"
+            action="hr_leaves_type_action"
+            sequence="3"/>
+    </data>
+</odoo>

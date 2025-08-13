@@ -1,0 +1,97 @@
+<!-- /hr_management/views/res_users_views.xml -->
+<odoo>
+    <record id="res_users_view_form_simple_modif_inherit_hr_management" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.simplified.inherit.hr.management</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="mode">primary</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <footer position="attributes">
+                <attribute name="invisible">1</attribute>
+            </footer>
+            <h1 position="replace"/>
+            <xpath expr="//field[@name='image_1920']" position="replace"/>
+        </field>
+    </record>
+
+    <record id="res_users_view_form_my_profile" model="ir.ui.view">
+        <field name="name">res.users.form.my.profile</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="hr_management.res_users_view_form_simple_modif_inherit_hr_management"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form position="attributes">
+                <attribute name="create">false</attribute>
+                <attribute name="delete">false</attribute>
+            </form>
+            <notebook position="before">
+                <field name="image_1920" widget="image" class="oe_avatar" options='{"zoom": true}'/>
+                <div class="oe_title">
+                    <field name="company_id" invisible="1"/>
+                    <h1><field name="name" required="1"/></h1>
+                    <h2><field name="job_id" placeholder="Job Position"/></h2>
+                    <field name="function" invisible="1"/>
+                </div>
+                <group>
+                    <group>
+                        <field name="work_email" widget="email"/>
+                        <field name="work_phone"/>
+                        <field name="work_mobile"/>
+                    </group>
+                    <group>
+                        <field name="department_id"/>
+                        <field name="manager_id" widget="many2one_avatar_user"/>
+                        <field name="coach_id" widget="many2one_avatar_user"/>
+                    </group>
+                </group>
+            </notebook>
+            <notebook position="inside">
+                <page string="Work Information" name="work_info">
+                    <group>
+                        <group string="Location">
+                            <field name="work_location"/>
+                        </group>
+                        <group string="Approvers">
+                            <field name="leave_manager_id" widget="many2one_avatar_user"/>
+                        </group>
+                        <group string="Schedule">
+                            <field name="resource_calendar_id" groups="hr_management.group_hr_management_manager"/>
+                            <field name="work_start_date"/>
+                            <field name="work_end_date"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Private Information" name="private_info">
+                    <group>
+                        <group string="Private Contact">
+                            <field name="private_address"/>
+                            <field name="phone"/>
+                        </group>
+                        <group string="Private Details">
+                            <field name="birthday"/>
+                            <field name="gender"/>
+                            <field name="nationality"/>
+                            <field name="identification_id"/>
+                            <field name="passport_id"/>
+                        </group>
+                        <group string="Education">
+                            <field name="certificate"/>
+                            <field name="study_field"/>
+                            <field name="study_school"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="res_users_action_my_profile" model="ir.actions.act_window">
+        <field name="name">My Profile</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="hr_management.res_users_view_form_my_profile"/>
+        <field name="target">current</field>
+    </record>
+</odoo>

@@ -1,0 +1,63 @@
+<!-- /hr_management/views/hr_menus.xml -->
+<odoo>
+    <data>
+        <!-- Main HR Management Menu -->
+        <menuitem
+            id="menu_hr_management_root"
+            name="HR Management"
+            sequence="10"
+            groups="hr_management.group_hr_management_user"/>
+
+        <!-- Employee Section -->
+        <menuitem
+            id="menu_hr_employee"
+            name="Employees"
+            parent="menu_hr_management_root"
+            action="hr_employee_action"
+            sequence="1"/>
+
+        <!-- Departments Section -->
+        <menuitem
+            id="menu_hr_department"
+            name="Departments"
+            parent="menu_hr_management_root"
+            action="hr_department_action"
+            sequence="2"/>
+
+        <!-- Requests Section -->
+        <menuitem
+            id="menu_hr_access_request"
+            name="Access Requests"
+            parent="menu_hr_management_root"
+            action="hr_access_request_action"
+            sequence="3"/>
+
+        <!-- Configuration Section -->
+        <menuitem
+            id="menu_hr_management_config"
+            name="Configuration"
+            parent="menu_hr_management_root"
+            sequence="100"
+            groups="hr_management.group_hr_management_user"/>
+
+        <menuitem
+            id="menu_hr_job"
+            name="Job Positions"
+            parent="menu_hr_management_config"
+            action="hr_job_action"
+            sequence="2"/>
+        <menuitem
+            id="menu_hr_working_schedules"
+            name="Working Schedules"
+            parent="menu_hr_management_config"
+            action="resource.action_resource_calendar_form"
+            sequence="3"
+            groups="hr_management.group_hr_management_manager"/>
+        <menuitem id="hr_management_menu_configuration"
+            name="Settings"
+            parent="menu_hr_management_config"
+            sequence="4"
+            action="hr_management_config_settings_action"
+            groups="base.group_system"/>
+    </data>
+</odoo>

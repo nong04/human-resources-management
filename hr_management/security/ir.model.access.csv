@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_employee_user,hr.employee user,model_hr_employee,group_hr_management_user,1,1,0,0
+access_hr_employee_manager,hr.employee manager,model_hr_employee,group_hr_management_manager,1,1,1,1
+access_hr_department_user,hr.department user,model_hr_department,group_hr_management_user,1,0,0,0
+access_hr_department_manager,hr.department manager,model_hr_department,group_hr_management_manager,1,1,1,1
+access_hr_job_user,hr.job user,model_hr_job,group_hr_management_user,1,0,0,0
+access_hr_job_manager,hr.job manager,model_hr_job,group_hr_management_manager,1,1,1,1
+access_hr_access_request_user,hr.access.request user,model_hr_access_request,group_hr_management_user,1,1,1,0
+access_hr_access_request_manager,hr.access.request manager,model_hr_access_request,group_hr_management_manager,1,1,1,1
+access_resource_calendar_user,resource.calendar user,resource.model_resource_calendar,group_hr_management_user,1,0,0,0
+access_resource_calendar_manager,resource.calendar manager,resource.model_resource_calendar,group_hr_management_manager,1,1,1,1
+access_resource_resource_user,resource.resource user,resource.model_resource_resource,group_hr_management_user,1,1,1,0
+access_resource_resource_manager,resource.resource manager,resource.model_resource_resource,group_hr_management_manager,1,1,1,1

@@ -1,0 +1,30 @@
+<!-- /hr_management/views/res_config_settings_views.xml -->
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form_hr_management" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.hr.management</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="70"/>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                    <app data-string="HR Management" string="HR Management" name="hr_management" groups="hr_management.group_hr_management_manager">
+                        <block title="Employee Automation" name="employee_automation_setting_container">
+                            <setting help="When enabled, a user account will be automatically created for any new employee who has a work email address.">
+                                <field name="auto_create_user_on_employee"/>
+                            </setting>
+                        </block>
+                    </app>
+                </xpath>
+            </field>
+        </record>
+    </data>
+
+    <record id="hr_management_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'hr_management', 'bin_size': False}</field>
+    </record>
+</odoo>

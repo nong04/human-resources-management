@@ -1,0 +1,53 @@
+<!-- /hr_leaves/views/hr_leaves_type_views.xml -->
+<odoo>
+    <data>
+        <!-- Form View for Time Off Type -->
+        <record id="hr_leaves_type_view_form" model="ir.ui.view">
+            <field name="name">hr.leaves.type.form</field>
+            <field name="model">hr.leaves.type</field>
+            <field name="arch" type="xml">
+                <form string="Time Off Type">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="e.g. Paid Time Off"/></h1>
+                        </div>
+                        <group>
+                            <group string="Configuration">
+                                <field name="requires_allocation" widget="radio"/>
+                                <field name="unpaid"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View for Time Off Type -->
+        <record id="hr_leaves_type_view_tree" model="ir.ui.view">
+            <field name="name">hr.leaves.type.tree</field>
+            <field name="model">hr.leaves.type</field>
+            <field name="arch" type="xml">
+                <tree string="Time Off Types" editable="bottom">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="requires_allocation"/>
+                    <field name="unpaid"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action for Time Off Type -->
+        <record id="hr_leaves_type_action" model="ir.actions.act_window">
+            <field name="name">Time Off Types</field>
+            <field name="res_model">hr.leaves.type</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new time off type
+                </p><p>
+                    Define different types of time off your company offers, such as Paid Time Off, Sick Days, or Unpaid Leave.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

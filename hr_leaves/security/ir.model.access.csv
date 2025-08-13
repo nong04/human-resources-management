@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_leaves_type_manager,hr_leaves.type manager,model_hr_leaves_type,hr_leaves.group_hr_leaves_manager,1,1,1,1
+access_hr_leaves_type_user,hr_leaves.type user,model_hr_leaves_type,hr_leaves.group_hr_leaves_user,1,0,0,0
+access_hr_leaves_allocation_manager,hr_leaves.allocation manager,model_hr_leaves_allocation,hr_leaves.group_hr_leaves_manager,1,1,1,1
+access_hr_leaves_allocation_user,hr_leaves.allocation user,model_hr_leaves_allocation,hr_leaves.group_hr_leaves_user,1,1,1,0
+access_hr_leaves_request_manager,hr_leaves.request manager,model_hr_leaves_request,hr_leaves.group_hr_leaves_manager,1,1,1,1
+access_hr_leaves_request_user,hr_leaves.request user,model_hr_leaves_request,hr_leaves.group_hr_leaves_user,1,1,1,0

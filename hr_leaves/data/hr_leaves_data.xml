@@ -1,0 +1,23 @@
+<!-- /hr_leaves/data/hr_leaves_data.xml -->
+<odoo>
+    <data noupdate="1">
+        <record id="leaves_type_paid" model="hr.leaves.type">
+            <field name="name">Paid Time Off</field>
+            <field name="requires_allocation">yes</field>
+            <field name="unpaid">False</field>
+            <field name="sequence">1</field>
+        </record>
+        <record id="leaves_type_sick" model="hr.leaves.type">
+            <field name="name">Sick Time Off</field>
+            <field name="requires_allocation">no</field>
+            <field name="unpaid">False</field>
+            <field name="sequence">2</field>
+        </record>
+        <record id="leaves_type_unpaid" model="hr.leaves.type">
+            <field name="name">Unpaid Time Off</field>
+            <field name="requires_allocation">no</field>
+            <field name="unpaid">True</field>
+            <field name="sequence">3</field>
+        </record>
+    </data>
+</odoo>

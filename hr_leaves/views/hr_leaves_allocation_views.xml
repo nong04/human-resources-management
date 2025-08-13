@@ -1,0 +1,72 @@
+<!-- /hr_leaves/views/hr_leaves_allocation_views.xml -->
+<odoo>
+    <data>
+        <!-- Form View for Allocation -->
+        <record id="hr_leaves_allocation_view_form" model="ir.ui.view">
+            <field name="name">hr.leaves.allocation.form</field>
+            <field name="model">hr.leaves.allocation</field>
+            <field name="arch" type="xml">
+                <form string="Time Off Allocation" edit="state in ['draft', 'confirm']">
+                    <header>
+                        <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                        <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'confirm'" groups="hr_leaves.group_hr_leaves_manager"/>
+                        <button name="action_refuse" string="Refuse" type="object" invisible="state != 'confirm'" groups="hr_leaves.group_hr_leaves_manager"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirm,approved"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="e.g. Annual Leave Allocation 2024" readonly="state not in ['draft', 'confirm']"/></h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="employee_id" widget="many2one_avatar_user" readonly="state not in ['draft']"/>
+                                <field name="leaves_type_id" readonly="state not in ['draft', 'confirm']"/>
+                            </group>
+                            <group>
+                                <label for="duration"/>
+                                <div class="o_row">
+                                    <field name="duration" readonly="state not in ['draft', 'confirm']"/>
+                                    <span>Days</span>
+                                </div>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View for Allocation -->
+        <record id="hr_leaves_allocation_view_tree" model="ir.ui.view">
+            <field name="name">hr.leaves.allocation.tree</field>
+            <field name="model">hr.leaves.allocation</field>
+            <field name="arch" type="xml">
+                <tree string="Allocations" edit="false">
+                    <field name="name"/>
+                    <field name="employee_id" widget="many2one_avatar_user"/>
+                    <field name="leaves_type_id"/>
+                    <field name="duration"/>
+                    <field name="state" widget="badge" decoration-warning="state == 'confirm'" decoration-success="state == 'approved'" decoration-danger="state == 'refuse'"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action for Allocation -->
+        <record id="hr_leaves_allocation_action" model="ir.actions.act_window">
+            <field name="name">Allocations</field>
+            <field name="res_model">hr.leaves.allocation</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new allocation
+                </p><p>
+                    Managers can allocate time off days to employees here (e.g., annual paid time off).
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

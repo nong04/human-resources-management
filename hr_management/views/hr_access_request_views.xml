@@ -1,0 +1,32 @@
+<!-- /hr_management/views/hr_access_request_views.xml -->
+<odoo>
+    <data>
+        <record id="hr_access_request_view_tree" model="ir.ui.view">
+            <field name="name">hr.access.request.tree</field>
+            <field name="model">hr.access.request</field>
+            <field name="arch" type="xml">
+                <tree editable="top" string="Access Requests">
+                    <field name="employee_id" widget="many2one_avatar_user" readonly="state != 'confirm'"/>
+                    <field name="requested_level" readonly="state != 'confirm'"/>
+                    <field name="create_date" readonly="1"/>
+                    <field name="state" widget="badge" decoration-warning="state == 'confirm'" decoration-success="state == 'approved'" decoration-danger="state == 'refused'"/>
+                    <button name="action_approve" type="object" icon="fa-check" title="Approve" invisible="state != 'confirm'" groups="hr_management.group_hr_management_manager"/>
+                    <button name="action_refuse" type="object" icon="fa-times" title="Refuse" invisible="state != 'confirm'" groups="hr_management.group_hr_management_manager"/>
+                    <button string="" invisible="state == 'confirm'"/>
+                </tree>
+            </field>
+        </record>
+        <record id="hr_access_request_action" model="ir.actions.act_window">
+            <field name="name">Access Requests</field>
+            <field name="res_model">hr.access.request</field>
+            <field name="view_mode">tree</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new access request
+                </p><p>
+                    Employees can request a higher access level, and managers can approve or refuse them here.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

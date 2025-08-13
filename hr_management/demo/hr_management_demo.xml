@@ -1,0 +1,231 @@
+<!-- /hr_management/demo/hr_management_demo.xml -->
+<odoo>
+    <data noupdate="1">
+        <!-- CÁC PHÒNG BAN (KHÔNG CÓ MANAGER) -->
+        <record id="dep_board" model="hr.department">
+            <field name="name">Board of Directors</field>
+        </record>
+        <record id="dep_rd" model="hr.department">
+            <field name="name">Research &amp; Development</field>
+        </record>
+        <record id="dep_sales_marketing" model="hr.department">
+            <field name="name">Sales &amp; Marketing</field>
+        </record>
+        <record id="dep_software" model="hr.department">
+            <field name="name">Software Development</field>
+            <field name="parent_id" ref="dep_rd"/>
+        </record>
+        <record id="dep_marketing" model="hr.department">
+            <field name="name">Marketing</field>
+            <field name="parent_id" ref="dep_sales_marketing"/>
+        </record>
+        <!-- CÁC JOBS -->
+        <record id="job_ceo" model="hr.job">
+            <field name="name">Chief Executive Officer</field>
+            <field name="department_id" ref="dep_board"/>
+        </record>
+        <record id="job_lead_dev" model="hr.job">
+            <field name="name">Lead Developer</field>
+            <field name="department_id" ref="dep_software"/>
+        </record>
+        <record id="job_dev" model="hr.job">
+            <field name="name">Software Developer</field>
+            <field name="department_id" ref="dep_software"/>
+        </record>
+        <record id="job_sales_director" model="hr.job">
+            <field name="name">Sales Director</field>
+            <field name="department_id" ref="dep_sales_marketing"/>
+        </record>
+        <record id="job_mkt_specialist" model="hr.job">
+            <field name="name">Marketing Specialist</field>
+            <field name="department_id" ref="dep_marketing"/>
+        </record>
+        <!-- CÁC NHÂN VIÊN -->
+        <record id="emp_manager_1" model="hr.employee">
+            <field name="name">Mitchell Admin</field>
+            <field name="job_id" ref="job_ceo"/>
+            <field name="department_id" ref="dep_board"/>
+            <field name="email">admin@yourcompany.example.com</field>
+            <field name="work_email">admin</field>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="work_phone">+1 555-0101</field>
+            <field name="work_status">active</field>
+            <field name="birthday">1980-01-15</field>
+        </record>
+        <record id="emp_manager_2" model="hr.employee">
+            <field name="name">Brandon Freeman</field>
+            <field name="job_id" ref="job_lead_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">brandon.freeman@example.com</field>
+            <field name="work_phone">+1 555-0102</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_1"/>
+            <field name="coach_id" ref="emp_manager_1"/>
+            <field name="birthday">1985-05-20</field>
+        </record>
+        <record id="emp_manager_3" model="hr.employee">
+            <field name="name">Laura Armstrong</field>
+            <field name="job_id" ref="job_sales_director"/>
+            <field name="department_id" ref="dep_sales_marketing"/>
+            <field name="work_email">laura.armstrong@example.com</field>
+            <field name="work_phone">+1 555-0103</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_1"/>
+            <field name="coach_id" ref="emp_manager_1"/>
+            <field name="birthday">1982-11-30</field>
+        </record>
+        <record id="emp_manager_4" model="hr.employee">
+            <field name="name">Shawn Matthews</field>
+            <field name="job_id" ref="job_lead_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">shawn.matthews@example.com</field>
+            <field name="work_phone">+1 555-0104</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_2"/>
+            <field name="coach_id" ref="emp_manager_2"/>
+            <field name="birthday">1988-03-10</field>
+        </record>
+        <record id="emp_manager_5" model="hr.employee">
+            <field name="name">Nicole Ford</field>
+            <field name="job_id" ref="job_mkt_specialist"/>
+            <field name="department_id" ref="dep_marketing"/>
+            <field name="work_email">nicole.ford@example.com</field>
+            <field name="work_phone">+1 555-0105</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_3"/>
+            <field name="coach_id" ref="emp_manager_3"/>
+            <field name="birthday">1990-07-25</field>
+        </record>
+        <record id="emp_user_1" model="hr.employee">
+            <field name="name">Abigail Peterson</field>
+            <field name="job_id" ref="job_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">abigail.peterson@example.com</field>
+            <field name="work_phone">+1 555-0106</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_2"/>
+            <field name="coach_id" ref="emp_manager_2"/>
+            <field name="birthday">1992-02-18</field>
+        </record>
+        <record id="emp_user_2" model="hr.employee">
+            <field name="name">John Smith</field>
+            <field name="job_id" ref="job_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">john.smith@example.com</field>
+            <field name="work_phone">+1 555-0107</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_2"/>
+            <field name="coach_id" ref="emp_manager_2"/>
+            <field name="birthday">1993-09-05</field>
+        </record>
+        <record id="emp_user_3" model="hr.employee">
+            <field name="name">Mary Johnson</field>
+            <field name="job_id" ref="job_mkt_specialist"/>
+            <field name="department_id" ref="dep_marketing"/>
+            <field name="work_email">mary.johnson@example.com</field>
+            <field name="work_phone">+1 555-0108</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_5"/>
+            <field name="coach_id" ref="emp_manager_5"/>
+            <field name="birthday">1994-01-22</field>
+        </record>
+        <record id="emp_user_4" model="hr.employee">
+            <field name="name">David Miller</field>
+            <field name="job_id" ref="job_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">david.miller@example.com</field>
+            <field name="work_phone">+1 555-0109</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_4"/>
+            <field name="coach_id" ref="emp_manager_4"/>
+            <field name="birthday">1991-06-14</field>
+        </record>
+        <record id="emp_user_5" model="hr.employee">
+            <field name="name">Sarah Davis</field>
+            <field name="job_id" ref="job_mkt_specialist"/>
+            <field name="department_id" ref="dep_marketing"/>
+            <field name="work_email">sarah.davis@example.com</field>
+            <field name="work_phone">+1 555-0110</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_5"/>
+            <field name="coach_id" ref="emp_manager_5"/>
+            <field name="birthday">1995-08-01</field>
+        </record>
+        <record id="emp_user_6" model="hr.employee">
+            <field name="name">James Wilson</field>
+            <field name="job_id" ref="job_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">james.wilson@example.com</field>
+            <field name="work_phone">+1 555-0111</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_4"/>
+            <field name="coach_id" ref="emp_manager_4"/>
+            <field name="birthday">1992-12-12</field>
+        </record>
+        <record id="emp_user_7" model="hr.employee">
+            <field name="name">Linda Brown</field>
+            <field name="job_id" ref="job_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">linda.brown@example.com</field>
+            <field name="work_phone">+1 555-0112</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_4"/>
+            <field name="coach_id" ref="emp_manager_4"/>
+            <field name="birthday">1993-04-28</field>
+        </record>
+        <record id="emp_user_8" model="hr.employee">
+            <field name="name">Robert Taylor</field>
+            <field name="job_id" ref="job_mkt_specialist"/>
+            <field name="department_id" ref="dep_marketing"/>
+            <field name="work_email">robert.taylor@example.com</field>
+            <field name="work_phone">+1 555-0113</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_5"/>
+            <field name="coach_id" ref="emp_manager_5"/>
+            <field name="birthday">1990-10-10</field>
+        </record>
+        <record id="emp_user_9" model="hr.employee">
+            <field name="name">Jennifer Moore</field>
+            <field name="job_id" ref="job_dev"/>
+            <field name="department_id" ref="dep_software"/>
+            <field name="work_email">jennifer.moore@example.com</field>
+            <field name="work_phone">+1 555-0114</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_2"/>
+            <field name="coach_id" ref="emp_manager_2"/>
+            <field name="birthday">1994-05-16</field>
+        </record>
+        <record id="emp_user_10" model="hr.employee">
+            <field name="name">Michael Anderson</field>
+            <field name="job_id" ref="job_mkt_specialist"/>
+            <field name="department_id" ref="dep_marketing"/>
+            <field name="work_email">michael.anderson@example.com</field>
+            <field name="work_phone">+1 555-0115</field>
+            <field name="work_status">active</field>
+            <field name="manager_id" ref="emp_manager_3"/>
+            <field name="coach_id" ref="emp_manager_3"/>
+            <field name="birthday">1991-08-21</field>
+        </record>
+        <!-- CẬP NHẬT MANAGER CHO CÁC PHÒNG BAN -->
+        <record id="dep_board" model="hr.department">
+            <field name="manager_id" ref="emp_manager_1"/>
+        </record>
+        <record id="dep_rd" model="hr.department">
+            <field name="manager_id" ref="emp_manager_2"/>
+        </record>
+        <record id="dep_sales_marketing" model="hr.department">
+            <field name="manager_id" ref="emp_manager_3"/>
+        </record>
+        <record id="dep_software" model="hr.department">
+            <field name="manager_id" ref="emp_manager_4"/>
+        </record>
+        <record id="dep_marketing" model="hr.department">
+            <field name="manager_id" ref="emp_manager_5"/>
+        </record>
+        <!-- GÁN QUYỀN MANAGER CHO 5 NHÂN VIÊN MANAGER -->
+        <function model="hr.employee" name="write">
+            <value eval="[ref('emp_manager_1'), ref('emp_manager_2'), ref('emp_manager_3'), ref('emp_manager_4'), ref('emp_manager_5')]"/>
+            <value eval="{'access_level': 'manager'}"/>
+        </function>
+    </data>
+</odoo>
