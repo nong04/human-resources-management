@@ -5,7 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { preferencesItem } from "@web/webclient/user_menu/user_menu_items";
 /**
- * Ghi đè hàm gốc của Odoo để thay đổi tên hiển thị.
+ * Override the user menu item for preferences to change its description.
  * @param {Object} env - The Odoo environment.
  * @returns {Object} The modified user menu item.
  */

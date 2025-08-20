@@ -5,7 +5,7 @@ class Users(models.Model):
     _inherit = 'res.users'
     _HR_MANAGEMENT_WRITEABLE_FIELDS = [
         'work_phone', 'work_mobile', 'work_email', 'job_id', 'department_id', 'manager_id', 'coach_id',
-        'work_location', 'leave_manager_id', 'resource_calendar_id', 'work_start_date', 'work_end_date',
+        'work_location', 'resource_calendar_id', 'work_start_date', 'work_end_date',
         'private_address', 'phone', 'birthday', 'gender', 'nationality', 'identification_id', 'passport_id',
         'certificate', 'study_field', 'study_school',
     ]
@@ -22,7 +22,6 @@ class Users(models.Model):
     manager_id = fields.Many2one(related='employee_id.manager_id', readonly=False, related_sudo=False)
     coach_id = fields.Many2one(related='employee_id.coach_id', readonly=False, related_sudo=False)
     work_location = fields.Char(related='employee_id.work_location', readonly=False, related_sudo=False)
-    leave_manager_id = fields.Many2one(related='employee_id.leave_manager_id', readonly=False, related_sudo=False)
     resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', readonly=False, related_sudo=False)
     work_start_date = fields.Date(related='employee_id.work_start_date', readonly=False, related_sudo=False)
     work_end_date = fields.Date(related='employee_id.work_end_date', readonly=False, related_sudo=False)

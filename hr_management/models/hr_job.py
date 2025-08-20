@@ -1,5 +1,4 @@
 # /hr_management/models/hr_job.py
-
 from odoo import api, fields, models, _
 
 class HrJob(models.Model):

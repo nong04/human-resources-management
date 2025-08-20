@@ -5,55 +5,49 @@
             <field name="name">hr.employee.form</field>
             <field name="model">hr.employee</field>
             <field name="arch" type="xml">
-                <form edit="can_edit">
+                <form edit="['is_manager', 'is_self']">
                     <sheet>
-                        <field name="can_edit" invisible="1"/>
+                        <field name="is_manager" invisible="1"/>
+                        <field name="is_self" invisible="1"/>
                         <field name="company_id" invisible="1"/>
                         <div name="button_box" class="oe_button_box">
-                            <button name="action_related_user"
-                                    type="object"
-                                    class="oe_stat_button"
-                                    icon="fa-user"
-                                    invisible="not can_edit"
+                            <button name="action_related_user" type="object" class="oe_stat_button" icon="fa-user" invisible="not is_manager and not is_self"
                                     help="Open the user form for this employee">
                                 <span class="o_stat_text">Related User</span>
                             </button>
                         </div>
                         <field name="image_1920" widget="image" class="oe_avatar" options='{"zoom": true}'/>
                         <div class="oe_title">
-                            <h1><field name="name" placeholder="Employee's Name" readonly="not can_edit"/></h1>
-                            <h2><field name="job_id" placeholder="Job Position" readonly="not can_edit"/></h2>
+                            <h1><field name="name" placeholder="Employee's Name" readonly="not is_manager and not is_self"/></h1>
+                            <h2><field name="job_id" placeholder="Job Position" readonly="not is_manager and not is_self"/></h2>
                         </div>
                         <group>
                             <group>
-                                <field name="work_email" readonly="not can_edit"/>
-                                <field name="work_phone" readonly="not can_edit"/>
-                                <field name="work_mobile" readonly="not can_edit"/>
+                                <field name="work_email" readonly="not is_manager and not is_self"/>
+                                <field name="work_phone" readonly="not is_manager and not is_self"/>
+                                <field name="work_mobile" readonly="not is_manager and not is_self"/>
                             </group>
                             <group>
-                                <field name="department_id" readonly="not can_edit"/>
-                                <field name="manager_id" widget="many2one_avatar_user" readonly="not can_edit"/>
-                                <field name="coach_id" widget="many2one_avatar_user" readonly="not can_edit"/>
+                                <field name="department_id" readonly="not is_manager"/>
+                                <field name="manager_id" widget="many2one_avatar_user" readonly="not is_manager"/>
+                                <field name="coach_id" widget="many2one_avatar_user" readonly="not is_manager"/>
                             </group>
                         </group>
                         <notebook>
                             <page name="work_info" string="Work Information">
                                 <group>
-                                    <group string="Location">
-                                        <field name="work_location" readonly="not can_edit"/>
+                                    <group string="Location" name="work_location_group">
+                                        <field name="work_location" readonly="not is_manager and not is_self"/>
                                     </group>
-                                    <group string="Approvers">
-                                        <field name="leave_manager_id" widget="many2one_avatar_user" readonly="not can_edit"/>
-                                    </group>
-                                    <group string="Schedule">
+                                    <group string="Schedule" name="schedule_group">
                                         <field name="resource_calendar_id" groups="hr_management.group_hr_management_manager"/>
-                                        <field name="work_start_date" readonly="not can_edit"/>
-                                        <field name="work_end_date" readonly="not can_edit"/>
-                                        <field name="tz" readonly="not can_edit"/>
+                                        <field name="work_start_date" readonly="not is_manager and not is_self"/>
+                                        <field name="work_end_date" readonly="not is_manager and not is_self"/>
+                                        <field name="tz" readonly="not is_manager and not is_self"/>
                                     </group>
                                 </group>
                             </page>
-                            <page name="private_info" string="Private Information" invisible="not can_edit">
+                            <page name="private_info" string="Private Information" invisible="not is_manager and not is_self">
                                 <group>
                                     <group string="Private Contact">
                                         <field name="private_address"/>
@@ -81,15 +75,17 @@
                                         <field name="employee_type"/>
                                         <field name="work_status"/>
                                     </group>
-                                    <group string="Access">
+                                    <group string="Access Rights">
                                         <field name="user_id" widget="many2one_avatar_user"/>
-                                        <field name="access_level"/>
+                                        <field name="management_access_level"/>
+                                    </group>
+                                    <group string="Approvers" name="approvers_group">
                                     </group>
                                 </group>
                             </page>
                         </notebook>
                     </sheet>
-                    <div class="oe_chatter" invisible="not can_edit">
+                    <div class="oe_chatter" invisible="not is_manager and not is_self">
                         <field name="message_follower_ids"/>
                         <field name="activity_ids"/>
                         <field name="message_ids"/>

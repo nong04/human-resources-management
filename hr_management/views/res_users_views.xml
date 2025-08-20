@@ -40,9 +40,9 @@
                         <field name="work_mobile"/>
                     </group>
                     <group>
-                        <field name="department_id"/>
-                        <field name="manager_id" widget="many2one_avatar_user"/>
-                        <field name="coach_id" widget="many2one_avatar_user"/>
+                        <field name="department_id" readonly="1"/>
+                        <field name="manager_id" widget="many2one_avatar_user" readonly="1"/>
+                        <field name="coach_id" widget="many2one_avatar_user" readonly="1"/>
                     </group>
                 </group>
             </notebook>
@@ -52,11 +52,8 @@
                         <group string="Location">
                             <field name="work_location"/>
                         </group>
-                        <group string="Approvers">
-                            <field name="leave_manager_id" widget="many2one_avatar_user"/>
-                        </group>
                         <group string="Schedule">
-                            <field name="resource_calendar_id" groups="hr_management.group_hr_management_manager"/>
+                            <field name="resource_calendar_id" readonly="1"/>
                             <field name="work_start_date"/>
                             <field name="work_end_date"/>
                         </group>

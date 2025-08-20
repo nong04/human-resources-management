@@ -1,15 +1,17 @@
-<!-- /hr_leaves/security/hr_security.xml -->
+<!-- /hr_leaves/security/hr_leaves_security.xml -->
 <odoo>
     <data>
         <record id="module_category_hr_leaves" model="ir.module.category">
-            <field name="name">Times Off</field>
+            <field name="name">Leaves</field>
             <field name="parent_id" ref="hr_management.module_category_hrm"/>
         </record>
+
         <record id="group_hr_leaves_user" model="res.groups">
             <field name="name">User</field>
             <field name="category_id" ref="module_category_hr_leaves"/>
             <field name="implied_ids" eval="[(4, ref('hr_management.group_hr_management_user'))]"/>
         </record>
+
         <record id="group_hr_leaves_manager" model="res.groups">
             <field name="name">Manager</field>
             <field name="category_id" ref="module_category_hr_leaves"/>
@@ -17,27 +19,28 @@
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
+        <!-- Record Rules -->
         <record id="hr_leaves_request_user_rule" model="ir.rule">
-            <field name="name">Leave Request: User can only see their own</field>
+            <field name="name">Leave Request: User can only access their own or team's</field>
             <field name="model_id" ref="model_hr_leaves_request"/>
             <field name="groups" eval="[(4, ref('group_hr_leaves_user'))]"/>
-            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('employee_id.leaves_manager_id', '=', user.id)]</field>
         </record>
         <record id="hr_leaves_request_manager_rule" model="ir.rule">
-            <field name="name">Leave Request: Manager can see all of their employees</field>
+            <field name="name">Leave Request: Manager can access all</field>
             <field name="model_id" ref="model_hr_leaves_request"/>
             <field name="groups" eval="[(4, ref('group_hr_leaves_manager'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
         </record>
 
         <record id="hr_leaves_allocation_user_rule" model="ir.rule">
-            <field name="name">Allocation Request: User can only see their own</field>
+            <field name="name">Allocation: User can only access their own or team's</field>
             <field name="model_id" ref="model_hr_leaves_allocation"/>
             <field name="groups" eval="[(4, ref('group_hr_leaves_user'))]"/>
-            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('employee_id.leaves_manager_id', '=', user.id)]</field>
         </record>
         <record id="hr_leaves_allocation_manager_rule" model="ir.rule">
-            <field name="name">Allocation Request: Manager can see all of their employees</field>
+            <field name="name">Allocation: Manager can access all</field>
             <field name="model_id" ref="model_hr_leaves_allocation"/>
             <field name="groups" eval="[(4, ref('group_hr_leaves_manager'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>

@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-
+# /payroll_attendances/__manifest__.py
 {
     'name': 'Payroll Attendances',
-    'version': '17.0.2.0',
-    'category': 'Human Resources/Attendances',
-    'sequence': 1,
+    'version': '1.0.0',
     'summary': 'Manage employee attendances and basic payroll',
-    'author': 'ACMAN.,JSC',
-    'website': 'https://www.acman.com.vn',
+    'category': 'Human Resources/Attendances',
+    'sequence': 2,
+    'author': 'Do Thanh Long',
+    'website': 'https://github.com/nong04/human-resources-management',
     'depends': ['base'],
     'installable': True,
     'application': True,

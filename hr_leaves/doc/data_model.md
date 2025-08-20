@@ -1,0 +1,177 @@
+# Mô hình Dữ liệu - Leave Management
+
+Tài liệu này phân tích chi tiết cấu trúc dữ liệu của module **Leave Management**, bao gồm các model, trường dữ liệu, mối quan hệ và các ràng buộc logic.
+
+## 1. Sơ đồ Quan hệ Dữ liệu (ERD)
+
+*(Sơ đồ này minh họa mối quan hệ giữa các model chính trong quy trình nghỉ phép)*
+
+```mermaid
+erDiagram
+    hr_employee {
+        float remaining_leaves
+        int leaves_manager_id
+        selection leaves_access_level
+    }
+    hr_leaves_type {
+        string name
+        int sequence
+        selection requires_allocation
+        boolean unpaid
+    }
+    hr_leaves_allocation {
+        string name
+        selection state
+        int employee_id
+        int manager_id
+        int approver_id
+        int leaves_type_id
+        float duration
+        date date_from
+        date date_to
+        text reason
+        text response
+    }
+    hr_leaves_request {
+        string name
+        selection state
+        int employee_id
+        int manager_id
+        int approver_id
+        int leaves_type_id
+        date date_from
+        date date_to
+        float duration
+        text reason
+        text response
+    }
+    hr_public_leaves {
+        string name
+        date date_from
+        date date_to
+    }
+    hr_leaves_calendar {
+        string name
+        int employee_id
+        date date_from
+        date date_to
+        selection type
+    }
+
+    hr_employee ||--o{ hr_leaves_allocation : "submits,receives"
+    hr_employee ||--o{ hr_leaves_request : "submits,receives"
+    hr_leaves_type ||--o{ hr_leaves_allocation : "is of type"
+    hr_leaves_type ||--o{ hr_leaves_request : "is of type"
+    hr_leaves_calendar }o--|| hr_leaves_request : "displays for"
+    hr_leaves_calendar }o--|| hr_public_leaves : "includes"
+```
+
+## 2. Mô tả chi tiết các Model
+
+### 2.1. Loại Nghỉ phép (`hr.leaves.type`)
+
+Model cơ sở để định nghĩa các loại nghỉ phép khác nhau trong công ty.
+
+#### Các trường dữ liệu
+- `name` (Char): Tên của loại nghỉ phép (ví dụ: "Nghỉ phép năm", "Nghỉ ốm").
+- `sequence` (Integer): Thứ tự hiển thị trong danh sách.
+- `requires_allocation` (Selection): Xác định loại phép có cần được cấp phát trước hay không.
+  - `yes`: Nhân viên phải được cấp phát (allocate) một số ngày nghỉ trước khi có thể yêu cầu.
+  - `no`: Nhân viên có thể yêu cầu nghỉ mà không cần cấp phát (ví dụ: nghỉ không lương).
+- `unpaid` (Boolean): Đánh dấu nếu đây là loại nghỉ không được trả lương.
+
+#### Ràng buộc Logic & Dữ liệu
+- **SQL Constraints (`_sql_constraints`):**
+  - `name_uniq`: Tên của mỗi loại nghỉ phép phải là duy nhất.
+- **Python Constraints:**
+  - Ghi đè phương thức `write` để ngăn chặn việc chỉnh sửa các trường quan trọng (trừ `sequence`) của loại phép đã tồn tại, đảm bảo tính nhất quán dữ liệu lịch sử.
+
+### 2.2. Cấp phát Nghỉ phép (`hr.leaves.allocation`)
+
+Model dùng để cấp phát (phân bổ) một số ngày nghỉ cho nhân viên. Kế thừa `mail.thread` và `mail.activity.mixin`.
+
+#### Các trường dữ liệu
+- `name` (Char): Mô tả tự động của yêu cầu cấp phát, được tính toán dựa trên tên nhân viên, loại phép và số ngày.
+- `state` (Selection): Trạng thái của quy trình (`draft`, `confirm`, `approved`, `refused`).
+- `employee_id` (Many2one -> `hr.employee`): Nhân viên được cấp phát.
+- `manager_id` (Many2one -> `hr.employee`): Quản lý trực tiếp của nhân viên (related, store=True).
+- `approver_id` (Many2one -> `res.users`): Người chịu trách nhiệm duyệt phép (`leaves_manager_id`) của nhân viên (related, store=True).
+- `leaves_type_id` (Many2one -> `hr.leaves.type`): Loại nghỉ phép được cấp phát (chỉ hiển thị các loại có `requires_allocation` = 'yes').
+- `duration` (Float): Số ngày được cấp phát.
+- `date_from`, `date_to` (Date): Khoảng thời gian hiệu lực của số ngày phép được cấp.
+- `reason`, `response` (Text): Lý do cấp phát và phản hồi từ người duyệt.
+- `can_approve` (Boolean): Trường tính toán, xác định người dùng hiện tại có quyền duyệt yêu cầu này không (là Leave Manager toàn cục hoặc là `approver_id`).
+
+#### Ràng buộc Logic & Dữ liệu
+- **Python Constraints (`@api.constrains`):**
+  - `_check_duration`: `duration` phải lớn hơn 0.
+- **Logic trong `write`:**
+  - Không cho phép chỉnh sửa một yêu cầu đã được `approved` hoặc `refused`.
+- **Logic quy trình:**
+  - Các phương thức `action_confirm`, `action_approve`, `action_refuse` điều khiển việc chuyển đổi `state` và tạo/phản hồi "Activity" cho người quản lý liên quan.
+
+### 2.3. Yêu cầu Nghỉ phép (`hr.leaves.request`)
+
+Model chính cho phép nhân viên tạo và gửi yêu cầu nghỉ phép. Kế thừa `mail.thread` và `mail.activity.mixin`.
+
+#### Các trường dữ liệu
+- `name` (Char): Mô tả tự động của yêu cầu nghỉ phép, được tính toán dựa trên tên nhân viên, loại phép và số ngày.
+- `state` (Selection): Trạng thái của quy trình (`draft`, `confirm`, `approved`, `refused`).
+- `employee_id` (Many2one -> `hr.employee`): Nhân viên xin nghỉ.
+- `manager_id` (Many2one -> `hr.employee`): Quản lý trực tiếp của nhân viên (related, store=True).
+- `approver_id` (Many2one -> `res.users`): Người chịu trách nhiệm duyệt phép (`leaves_manager_id`) của nhân viên (related, store=True).
+- `leaves_type_id` (Many2one -> `hr.leaves.type`): Loại nghỉ phép muốn xin.
+- `date_from`, `date_to` (Date): Ngày bắt đầu và kết thúc nghỉ.
+- `duration` (Float): **Trường tính toán quan trọng**, tự động xác định số ngày làm việc thực tế trong khoảng thời gian xin nghỉ.
+- `reason`, `response` (Text): Lý do xin nghỉ và phản hồi từ người duyệt.
+- `can_approve` (Boolean): Trường tính toán, xác định người dùng hiện tại có quyền duyệt yêu cầu này không (là Leave Manager toàn cục hoặc là `approver_id`).
+
+#### Ràng buộc Logic & Dữ liệu
+- **Logic tính `duration` (`_compute_duration`):**
+  - Tự động tính toán số ngày dựa trên lịch làm việc (`resource_calendar_id`) và múi giờ (`tz`) của nhân viên.
+  - Tự động **loại trừ** các ngày cuối tuần và các ngày nghỉ lễ được định nghĩa trong model `hr.public.leaves`.
+- **Logic kiểm tra (`action_confirm`):**
+  - **Kiểm tra số dư phép:** Gọi phương thức `_get_remaining_days` để so sánh số ngày xin nghỉ với số ngày phép còn lại (tổng `allocation` - tổng `request` đã duyệt).
+  - **Kiểm tra thời gian:** `duration` phải lớn hơn 0 (không thể xin nghỉ vào ngày lễ hoặc cuối tuần).
+- **Logic chống trùng lặp (`_check_overlapping_leaves`):**
+  - Được gọi khi `create` và `write`.
+  - Ngăn chặn một nhân viên có hai yêu cầu nghỉ phép ở trạng thái `approved` bị trùng lặp về thời gian.
+
+### 2.4. Ngày nghỉ Lễ (`hr.public.leaves`)
+
+Model đơn giản để định nghĩa các ngày nghỉ lễ chung của công ty.
+
+#### Các trường dữ liệu
+- `name` (Char): Tên ngày lễ (ví dụ: "Tết Nguyên Đán").
+- `date_from`, `date_to` (Date): Khoảng thời gian của ngày lễ.
+
+#### Ràng buộc và Phương thức
+- **SQL Constraints (`_sql_constraints`):**
+  - `date_check`: `date_from` phải nhỏ hơn hoặc bằng `date_to`.
+- **Phương thức `get_public_leave_dates`:**
+  - Trả về một tập hợp (set) tất cả các ngày nghỉ lễ, được sử dụng bởi model `hr.leaves.request` để tính toán `duration`.
+
+### 2.5. Lịch nghỉ tổng quan (`hr.leaves.calendar`)
+
+Đây là một model ảo (SQL View), không lưu trữ dữ liệu trực tiếp mà tổng hợp thông tin từ các model khác để hiển thị trên lịch.
+
+#### Các trường dữ liệu (chỉ đọc)
+- `name` (Char): Tên của sự kiện (tên yêu cầu nghỉ hoặc tên ngày lễ).
+- `employee_id` (Many2one -> `hr.employee`): Nhân viên liên quan (chỉ áp dụng cho yêu cầu nghỉ).
+- `date_from`, `date_to` (Date): Ngày bắt đầu và kết thúc của sự kiện.
+- `type` (Selection): Phân loại sự kiện là `request` (Yêu cầu nghỉ) hay `public` (Ngày lễ).
+
+## 3. Mở rộng Model có sẵn
+
+### Nhân viên (`hr.employee`)
+Module `hr_leaves` thêm các trường và chức năng mới vào model `hr.employee` để tích hợp liền mạch.
+
+#### Các trường dữ liệu mới
+- `remaining_leaves` (Float): **Trường tính toán**, hiển thị tổng số ngày phép (loại cần cấp phát) còn lại của nhân viên, được tính bằng `(tổng allocation đã duyệt) - (tổng request đã duyệt)`.
+- `leaves_manager_id` (Many2one -> `res.users`): Người chịu trách nhiệm duyệt phép cho nhân viên này. Mặc định được tính từ `manager_id` của nhân viên nhưng có thể được ghi đè thủ công.
+- `leaves_access_level` (Selection): Cấp độ quyền (`user`, `manager`) trong module Leaves, liên kết với các nhóm quyền của module (`group_hr_leaves_user/manager`).
+
+#### Chức năng mới
+- **Smart Button "Leaves":**
+  - Thêm một nút bấm trên form nhân viên, hiển thị số ngày phép còn lại.
+  - Khi nhấn vào, nút sẽ mở danh sách tất cả các yêu cầu nghỉ phép của nhân viên đó (`action_open_my_leaves`).

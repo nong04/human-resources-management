@@ -1,5 +1,4 @@
 # /hr_management/models/hr_department.py
-
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 

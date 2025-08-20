@@ -1,0 +1,41 @@
+<!-- /hr_leaves/views/hr_leaves_calendar_views.xml -->
+<odoo>
+    <data>
+        <record id="hr_leaves_calendar_view_calendar" model="ir.ui.view">
+            <field name="name">hr.leaves.calendar.calendar</field>
+            <field name="model">hr.leaves.calendar</field>
+            <field name="arch" type="xml">
+                <calendar date_start="date_from" date_stop="date_to" string="name" color="employee_id" mode="month">
+                    <field name="employee_id" avatar_field="image_1920"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record id="hr_leaves_calendar_view_search" model="ir.ui.view">
+            <field name="name">hr.leaves.calendar.search</field>
+            <field name="model">hr.leaves.calendar</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="employee_id"/>
+                    <separator/>
+                    <filter name="filter_request" string="Leave Requests" domain="[('type', '=', 'request')]"/>
+                    <filter name="filter_public" string="Public Leaves" domain="[('type', '=', 'public')]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="hr_leaves_calendar_action" model="ir.actions.act_window">
+            <field name="name">Overview</field>
+            <field name="res_model">hr.leaves.calendar</field>
+            <field name="view_mode">calendar</field>
+            <field name="search_view_id" ref="hr_leaves_calendar_view_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Overview
+                </p><p>
+                    This calendar displays all approved leave requests and public holidays.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

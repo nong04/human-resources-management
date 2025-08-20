@@ -1,105 +1,56 @@
-# Module HR Management - Tài liệu Chức năng
+# Tài liệu Module HR Management
 
-## 1. Tổng quan
+## 1. Giới thiệu
 
-**HR Management** là một module tùy chỉnh cho Odoo 17, được xây dựng để cung cấp một giải pháp quản lý nhân sự tập trung và hiệu quả. Module cho phép quản lý thông tin nhân viên, cơ cấu tổ chức (phòng ban, vị trí công việc), và kiểm soát quyền truy cập một cách linh hoạt.
+**HR Management** là một module nền tảng cho Odoo 17, được xây dựng với mục tiêu cung cấp một hệ thống quản lý nhân sự tập trung, linh hoạt và dễ mở rộng. Module này đóng vai trò là "trái tim" cho các hoạt động nhân sự, quản lý thông tin cốt lõi về nhân viên và cơ cấu tổ chức của doanh nghiệp.
 
-## 2. Các Chức năng Chính
+### Mục tiêu chính:
+- **Tập trung hóa Dữ liệu:** Lưu trữ toàn bộ hồ sơ nhân viên, từ thông tin liên lạc, vị trí công việc đến các thông tin cá nhân, tại một nơi duy nhất.
+- **Xây dựng Sơ đồ Tổ chức:** Cho phép định nghĩa cấu trúc công ty một cách trực quan thông qua các Phòng ban (Departments) và Vị trí Công việc (Job Positions).
+- **Phân quyền Linh hoạt:** Cung cấp một hệ thống phân quyền 2 cấp (User và Manager) rõ ràng, cùng với quy trình yêu cầu và phê duyệt quyền minh bạch.
+- **Nền tảng Mở rộng:** Thiết kế để dễ dàng tích hợp và làm cơ sở cho các module nhân sự chuyên sâu khác như Quản lý Nghỉ phép, Chấm công, Bảng lương, Tuyển dụng.
 
-### 2.1. Quản lý Nhân viên (`hr.employee`)
+### Đối tượng sử dụng:
+- **Quản lý Nhân sự (HR Manager):** Quản lý toàn bộ thông tin, cấu hình hệ thống và phê duyệt các yêu cầu.
+- **Nhân viên (Employee):** Tự xem và cập nhật thông tin cá nhân, xem thông tin công khai của đồng nghiệp.
+- **Quản lý Trực tiếp (Line Manager):** Xem thông tin nhân viên trong team của mình.
 
-Đây là model cốt lõi, lưu trữ toàn bộ thông tin về nhân viên.
+---
 
-#### 2.1.1. Thông tin chi tiết
+## 2. Tài liệu Chi tiết
 
-- **Thông tin công việc:**
-  - Email, điện thoại công việc (cố định và di động).
-  - Liên kết chặt chẽ với **Phòng ban** (`hr.department`) và **Vị trí công việc** (`hr.job`).
-  - Xác định **Quản lý trực tiếp** (`manager_id`) và **Người hướng dẫn** (`coach_id`).
-  - Ngày bắt đầu/kết thúc làm việc, lịch làm việc (`resource_calendar_id`), và múi giờ (`tz`).
-  - Trạng thái làm việc (`work_status`): Active, Left.
+Để hiểu rõ hơn về module, vui lòng tham khảo các tài liệu chi tiết dưới đây:
 
-- **Thông tin cá nhân:**
-  - Địa chỉ, email, điện thoại cá nhân.
-  - Thông tin nhân khẩu học: Ngày sinh, giới tính, quốc tịch.
-  - Giấy tờ tùy thân: Số CCCD/CMND, số hộ chiếu.
-  - Trình độ học vấn: Bằng cấp, lĩnh vực học, trường học.
+- ### **[Mô hình Dữ liệu](./data_model.md)**
+  > *Dành cho nhà phát triển và người quản trị hệ thống.*
+  > 
+  > Tài liệu này phân tích sâu về cấu trúc kỹ thuật của module. Nó mô tả chi tiết các model (`hr.employee`, `hr.department`, v.v.), các trường dữ liệu quan trọng, các mối quan hệ (Many2one, One2many), và các ràng buộc SQL. Đây là tài liệu cần thiết nếu bạn muốn tùy chỉnh hoặc phát triển các tính năng mở rộng dựa trên module này.
 
-- **Đồng bộ hóa với Người dùng (`res.users`):**
-  - Mỗi nhân viên có thể được liên kết với một tài khoản người dùng duy nhất.
-  - Thông tin cơ bản (tên, email, ảnh đại diện, ngôn ngữ, múi giờ) được **đồng bộ hai chiều** giữa nhân viên và người dùng. Thay đổi ở một nơi sẽ tự động cập nhật ở nơi còn lại.
+- ### **[Hướng dẫn Sử dụng](./user_guide.md)**
+  > *Dành cho người dùng cuối (Nhân viên, Quản lý).*
+  > 
+  > Hướng dẫn từng bước các quy trình nghiệp vụ phổ biến nhất, bao gồm:
+  > - **Quy trình 1:** Thêm mới và quản lý hồ sơ nhân viên.
+  > - **Quy trình 2:** Thiết lập và điều chỉnh cơ cấu phòng ban, vị trí công việc.
+  > - **Quy trình 3:** Gửi yêu cầu và phê duyệt nâng cấp quyền hạn.
+  > 
+  > Tài liệu này được trình bày dưới dạng các bước thực hiện cụ thể, giúp người dùng nhanh chóng làm quen và sử dụng thành thạo module.
 
-#### 2.1.2. Tự động hóa và Ràng buộc
-- **Tự động tạo User:** Có thể cấu hình trong *Settings* để tự động tạo một tài khoản người dùng mới khi một nhân viên được tạo với email công việc.
-- **Ràng buộc dữ liệu:**
-  - Ngày sinh không được ở tương lai.
-  - Ngày kết thúc công việc không được trước ngày bắt đầu.
-  - Nhân viên không thể là quản lý/người hướng dẫn của chính mình.
-  - Email công việc và liên kết tới User là duy nhất.
+- ### **[Chức năng Chi tiết](./features.md)**
+  > *Dành cho người muốn hiểu sâu về logic hoạt động của module.*
+  > 
+  > Tài liệu này đi sâu vào "cách thức hoạt động" của các tính năng, giải thích các logic nghiệp vụ ẩn sau giao diện người dùng. Các chủ đề bao gồm:
+  > - Hệ thống phân quyền chi tiết cho User và Manager.
+  > - Cơ chế đồng bộ hóa dữ liệu tự động giữa Nhân viên và Người dùng (User).
+  > - Các tính năng tự động hóa như tự tạo user.
+  > - Danh sách các quy tắc và ràng buộc dữ liệu để đảm bảo tính toàn vẹn của hệ thống.
 
-#### 2.1.3. Tương tác
-- **Nút "Related User":** Trên form nhân viên, cho phép truy cập nhanh đến form người dùng liên quan.
-- **Trang "My Profile":** Nhân viên có thể tự xem và chỉnh sửa thông tin cá nhân của mình (nếu được cho phép).
+---
 
-### 2.2. Quản lý Cơ cấu Tổ chức
+## 3. Cài đặt và Phụ thuộc
 
-#### 2.2.1. Phòng ban (`hr.department`)
-- Quản lý phòng ban theo **cấu trúc cây (cha-con)**, cho phép xây dựng sơ đồ tổ chức đa cấp.
-- Mỗi phòng ban có một **Quản lý** (`manager_id`).
-- **Smart button "Employees":** Hiển thị và truy cập nhanh danh sách tất cả nhân viên thuộc phòng ban đó.
-- Tự động đếm số lượng nhân viên trong phòng ban.
-
-#### 2.2.2. Vị trí Công việc (`hr.job`)
-- Định nghĩa các chức danh, vị trí công việc trong công ty.
-- Mỗi vị trí có thể được gán cho một phòng ban cụ thể.
-- **Smart button "Employees":** Hiển thị và truy cập nhanh danh sách nhân viên đang giữ vị trí đó.
-
-### 2.3. Quản lý Phân quyền và Truy cập
-
-Module xây dựng một hệ thống phân quyền chi tiết với 2 cấp độ chính.
-
-#### 2.3.1. Các Nhóm quyền
-- **HR Management / User (`group_hr_management_user`):**
-  - Có quyền xem danh sách nhân viên, phòng ban, vị trí công việc.
-  - Có thể xem và tự chỉnh sửa thông tin cá nhân của mình.
-  - Không thể tạo/xóa nhân viên, phòng ban, vị trí.
-  - Có thể tạo yêu cầu nâng cấp quyền.
-- **HR Management / Manager (`group_hr_management_manager`):**
-  - Có **toàn quyền** (CRUD) trên các model Nhân viên, Phòng ban, Vị trí công việc.
-  - Có thể duyệt/từ chối các yêu cầu nâng cấp quyền.
-  - Có quyền truy cập menu *Configuration*.
-
-#### 2.3.2. Yêu cầu Nâng cấp Quyền (`hr.access.request`)
-- Một cơ chế cho phép nhân viên (User) gửi yêu cầu để trở thành Manager.
-- **Luồng hoạt động:**
-  1. User tạo một yêu cầu mới từ menu "Access Requests".
-  2. Yêu cầu ở trạng thái "To Approve".
-  3. Manager vào danh sách yêu cầu, có thể **Approve** (Duyệt) hoặc **Refuse** (Từ chối).
-  4. Nếu **Approve**: Hệ thống tự động gán người dùng vào nhóm `group_hr_management_manager`.
-  5. Nếu **Refuse**: Yêu cầu chuyển sang trạng thái "Refused".
-- **Ràng buộc:**
-  - Không thể tạo yêu cầu cho nhân viên không có tài khoản user.
-  - Không thể tạo yêu cầu trùng lặp khi đã có yêu cầu đang chờ xử lý.
-  - Không thể hạ quyền của Manager cuối cùng trong hệ thống.
-
-### 2.4. Cấu hình và Tùy chỉnh
-
-- **Menu Cấu hình (`Configuration`):**
-  - Quản lý Vị trí công việc (`Job Positions`).
-  - Quản lý Lịch làm việc (`Working Schedules`).
-- **Menu Settings (dành cho System Admin):**
-  - **Auto-Create User:** Bật/tắt tính năng tự động tạo user khi tạo nhân viên mới.
-
-### 2.5. Cải tiến Giao diện Người dùng (UI/UX)
-
-- **Menu "My Profile":** Thay thế menu "Preferences" mặc định của Odoo, điều hướng người dùng đến một trang hồ sơ cá nhân thân thiện và đầy đủ thông tin hơn.
-- **Search Panel:** Cung cấp bộ lọc theo Phòng ban trên giao diện danh sách nhân viên, giúp tìm kiếm và phân loại dễ dàng.
-- **Smart Buttons:** Các nút bấm thông minh được thêm vào form Nhân viên và Phòng ban để điều hướng nhanh đến các bản ghi liên quan.
-
-## 3. Dữ liệu Demo
-
-Module đi kèm một bộ dữ liệu demo (`hr_management_demo.xml`) đơn giản, giúp người dùng mới nhanh chóng hiểu được cách hoạt động của hệ thống:
-- Tạo sẵn một cơ cấu phòng ban đa cấp.
-- Tạo sẵn các vị trí công việc tương ứng.
-- Tạo một danh sách nhân viên với các vai trò và mối quan hệ quản lý rõ ràng.
-- Tự động gán quyền Manager cho các nhân viên quản lý trong dữ liệu demo.
+- **Phiên bản Odoo:** 17.0
+- **Các module phụ thuộc:**
+  - `base`: Module lõi của Odoo.
+  - `mail`: Cung cấp tính năng chatter, activity và thông báo.
+  - `resource`: Cung cấp model `resource.resource` để quản lý lịch làm việc.

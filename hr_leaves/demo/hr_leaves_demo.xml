@@ -1,0 +1,50 @@
+<!-- /hr_leaves/demo/hr_leaves_demo.xml -->
+<odoo>
+    <data>
+        <record id="demo_allocation_paid" model="hr.leaves.allocation">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="leaves_type_id" ref="hr_leaves.leaves_type_paid"/>
+            <field name="duration">15</field>
+            <field name="date_from" eval="time.strftime('%Y-01-01')"/>
+            <field name="date_to" eval="time.strftime('%Y-12-31')"/>
+            <field name="reason">Annual allocation for the current year.</field>
+            <field name="state">approved</field>
+            <field name="approver_id" ref="hr_management.emp_manager_2"/>
+        </record>
+
+        <record id="demo_request_approved" model="hr.leaves.request">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="leaves_type_id" ref="hr_leaves.leaves_type_paid"/>
+            <field name="date_from" eval="(DateTime.now() + relativedelta(days=30)).strftime('%Y-%m-%d')"/>
+            <field name="date_to" eval="(DateTime.now() + relativedelta(days=34)).strftime('%Y-%m-%d')"/>
+            <field name="reason">Annual summer vacation with family.</field>
+            <field name="state">approved</field>
+            <field name="approver_id" ref="hr_management.emp_manager_2"/>
+        </record>
+
+        <record id="demo_request_to_approve" model="hr.leaves.request">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="leaves_type_id" ref="hr_leaves.leaves_type_unpaid"/>
+            <field name="date_from" eval="(DateTime.now() + relativedelta(days=45)).strftime('%Y-%m-%d')"/>
+            <field name="date_to" eval="(DateTime.now() + relativedelta(days=45)).strftime('%Y-%m-%d')"/>
+            <field name="reason">Moving to a new apartment.</field>
+            <field name="state">confirm</field>
+        </record>
+
+        <record id="demo_request_sick" model="hr.leaves.request">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="leaves_type_id" ref="hr_leaves.leaves_type_sick"/>
+            <field name="date_from" eval="(DateTime.now() - relativedelta(days=10)).strftime('%Y-%m-%d')"/>
+            <field name="date_to" eval="(DateTime.now() - relativedelta(days=9)).strftime('%Y-%m-%d')"/>
+            <field name="reason">Caught a cold, need to rest.</field>
+            <field name="state">approved</field>
+            <field name="approver_id" ref="hr_management.emp_manager_2"/>
+        </record>
+
+        <record id="demo_public_holiday" model="hr.public.leaves">
+            <field name="name">Liberation Day</field>
+            <field name="date_from" eval="time.strftime('%Y-04-30')"/>
+            <field name="date_to" eval="time.strftime('%Y-04-30')"/>
+        </record>
+    </data>
+</odoo>

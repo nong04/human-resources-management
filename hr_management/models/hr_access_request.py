@@ -1,7 +1,6 @@
 # /hr_management/models/hr_access_request.py
-
 from odoo import fields, models, api, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError
 
 class HrAccessRequest(models.Model):
     _name = 'hr.access.request'
@@ -11,7 +10,7 @@ class HrAccessRequest(models.Model):
     employee_id = fields.Many2one('hr.employee', string='Employee', required=True, domain="[('user_id', '!=', False)]")
     user_id = fields.Many2one('res.users', string='User', related='employee_id.user_id', store=True, readonly=True)
     requested_level = fields.Selection([('user', 'User'), ('manager', 'Manager')], string='Requested Level', default='manager', required=True)
-    state = fields.Selection([('confirm', 'To Approve'), ('approved', 'Approved'), ('refused', 'Refused')], string='Status', default='draft', tracking=True)
+    state = fields.Selection([('confirm', 'To Approve'), ('approved', 'Approved'), ('refused', 'Refused')], string='Status', default='confirm', tracking=True)
 
     @api.model_create_multi
     def create(self, vals_list):

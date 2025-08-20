@@ -1,6 +1,4 @@
 # /hr_management/models/hr_employee.py
-from pkg_resources import require
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, AccessError, ValidationError
 import logging
@@ -17,7 +15,8 @@ class HrEmployee(models.Model):
     active = fields.Boolean('Active', related='resource_id.active', default=True, store=True, readonly=False,
                             help="Set active to false to hide the employee without removing it.")
     image_1920 = fields.Image("Image", max_width=1920, max_height=1920)
-    can_edit = fields.Boolean(string="Can Edit", compute='_compute_can_edit')
+    is_manager = fields.Boolean(string="Is Manager", compute='_compute_is_manager')
+    is_self = fields.Boolean(string="Is Self", compute='_compute_is_self')
     # --- Thông tin công việc ---
     work_email = fields.Char(string="Work Email", tracking=True)
     work_phone = fields.Char(string="Work Phone", tracking=True)
@@ -35,7 +34,7 @@ class HrEmployee(models.Model):
         help="This field is used in order to define in which timezone the resources will work.")
     # --- Thông tin cá nhân ---
     private_address = fields.Char(string="Private Address", tracking=True)
-    email = fields.Char(string="Private Email", tracking=True)
+    email = fields.Char(string="Private Email", tracking=True, required=True)
     phone = fields.Char(string="Private Phone", tracking=True)
     language = fields.Selection(
         selection='_get_language_selection', string="Language", default=lambda self: self.env.user.lang, required=True, tracking=True)
@@ -52,10 +51,8 @@ class HrEmployee(models.Model):
     study_school = fields.Char("School", tracking=True)
     # --- Cài đặt HR ---
     user_id = fields.Many2one('res.users', 'User', related='resource_id.user_id', store=True, readonly=False, ondelete='restrict')
-    access_level = fields.Selection(
-        [('user', 'User'), ('manager', 'Manager')],
-        string='Access Level', compute='_compute_access_level',inverse='_inverse_access_level', store=True, readonly=False, tracking=True)
-    leave_manager_id = fields.Many2one('res.users', string='Time Off Approver', tracking=True)
+    management_access_level = fields.Selection([('user', 'User'), ('manager', 'Manager')], string='Management',
+        compute='_compute_management_access_level', inverse='_inverse_management_access_level', store=True, readonly=False, tracking=True)
     employee_type = fields.Selection([
         ('employee', 'Employee'), ('student', 'Student'), ('trainee', 'Trainee'),
         ('contractor', 'Contractor'), ('freelance', 'Freelancer')],
@@ -93,40 +90,45 @@ class HrEmployee(models.Model):
 
     @api.depends('user_id')
     @api.depends_context('uid')
-    def _compute_can_edit(self):
-        is_manager = self.env.user.has_group('hr_management.group_hr_management_manager')
+    def _compute_is_manager(self):
         for employee in self:
-            employee.can_edit = is_manager or (employee.user_id and employee.user_id.id == self.env.uid)
+            employee.is_manager = self.env.user.has_group('hr_management.group_hr_management_manager')
+
+    @api.depends('user_id')
+    @api.depends_context('uid')
+    def _compute_is_self(self):
+        for employee in self:
+            employee.is_self = (employee.user_id and employee.user_id.id == self.env.uid) or (self.env.user.id == employee.user_id.id)
 
     @api.depends('user_id', 'user_id.groups_id')
-    def _compute_access_level(self):
+    def _compute_management_access_level(self):
         manager_group = self.env.ref('hr_management.group_hr_management_manager', raise_if_not_found=False)
         if not manager_group:
-            self.access_level = 'user'
+            self.management_access_level = 'user'
             return
         manager_users = manager_group.users
         for employee in self:
             if employee.user_id and employee.user_id in manager_users:
-                employee.access_level = 'manager'
+                employee.management_access_level = 'manager'
             else:
-                employee.access_level = 'user'
+                employee.management_access_level = 'user'
 
-    @api.onchange('access_level')
-    def _onchange_access_level(self):
+    @api.onchange('management_access_level')
+    def _onchange_management_access_level(self):
         if not self._origin.id or not self.user_id:
             return
         is_current_user_manager = self.env.user.has_group('hr_management.group_hr_management_manager')
-        if is_current_user_manager and self.user_id == self.env.user and self.access_level == 'user':
+        if is_current_user_manager and self.user_id == self.env.user and self.management_access_level == 'user':
             return {
                 'warning': {
                     'title': _("Confirmation"),
-                    'message': _("You are about to change your own access level to User. You will lose your manager privileges upon saving. Please double-check if this is not your intention."),
+                    'message': _("You are about to change your own Management access level to User. You will lose your manager privileges upon saving."),
                 }
             }
 
-    def _inverse_access_level(self):
+    def _inverse_management_access_level(self):
         if not self.env.user.has_group('hr_management.group_hr_management_manager'):
-            raise AccessError(_("Only HR Managers can change access levels."))
+            raise AccessError(_("Only HR Managers can change Management access levels."))
         manager_group = self.env.ref('hr_management.group_hr_management_manager', raise_if_not_found=False)
         if not manager_group:
             return
@@ -134,9 +136,9 @@ class HrEmployee(models.Model):
             if not employee.user_id:
                 continue
             is_last_manager = len(manager_group.users) == 1 and employee.user_id in manager_group.users
-            if is_last_manager and employee.access_level == 'user':
+            if is_last_manager and employee.management_access_level == 'user':
                 raise UserError(_("You cannot remove the last manager (%s) from the system.") % employee.name)
-            if employee.access_level == 'manager':
+            if employee.management_access_level == 'manager':
                 manager_group.sudo().users = [(4, employee.user_id.id)]
             else:
                 manager_group.sudo().users = [(3, employee.user_id.id)]

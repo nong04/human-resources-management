@@ -1,12 +1,12 @@
 # /hr_management/__manifest__.py
 {
     'name': 'HR Management',
-    'version': '17.0.2.0',
+    'version': '1.0.0',
     'summary': 'A module for managing employees, departments, and job positions.',
     'category': 'Human Resources/Employees',
     'sequence': 1,
     'author': 'Do Thanh Long',
-    'website': 'nong',
+    'website': 'https://github.com/nong04/human-resources-management',
     'depends': [
         'base',
         'mail',

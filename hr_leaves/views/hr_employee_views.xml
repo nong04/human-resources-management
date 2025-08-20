@@ -7,13 +7,20 @@
             <field name="inherit_id" ref="hr_management.hr_employee_view_form"/>
             <field name="arch" type="xml">
                 <div name="button_box" position="inside">
-                    <button name="action_open_employee_allocations" class="oe_stat_button" icon="fa-calendar" type="object" help="Remaining Allocated Leaves">
+                    <button name="action_open_my_leaves" class="oe_stat_button" icon="fa-calendar" type="object" invisible="not ['is_manager', 'is_self']"
+                            help="Remaining Allocated Leaves">
                         <div class="o_field_widget o_stat_info">
-                            <span class="o_stat_value"><field name="remaining_allocated_leaves_count"/> Days</span>
-                            <span class="o_stat_text">Remaining</span>
+                            <span class="o_stat_value"><field name="remaining_leaves"/> Days</span>
+                            <span class="o_stat_text">Leaves</span>
                         </div>
                     </button>
                 </div>
+                <xpath expr="//group[@name='approvers_group']" position="inside">
+                    <field name="leaves_manager_id" widget="many2one_avatar_user"/>
+                </xpath>
+                <xpath expr="//field[@name='management_access_level']" position="after">
+                    <field name="leaves_access_level"/>
+                </xpath>
             </field>
         </record>
     </data>
