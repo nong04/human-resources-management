@@ -2,68 +2,103 @@
 
 Tài liệu này phân tích chi tiết cấu trúc dữ liệu của module **Leave Management**, bao gồm các model, trường dữ liệu, mối quan hệ và các ràng buộc logic.
 
-## 1. Sơ đồ Quan hệ Dữ liệu (ERD)
+## 1. Sơ đồ Lớp UML (UML Class Diagram)
 
-*(Sơ đồ này minh họa mối quan hệ giữa các model chính trong quy trình nghỉ phép)*
+Sơ đồ dưới đây minh họa cấu trúc các model trong module `hr_leaves` và mối quan hệ kế thừa (`_inherit`) quan trọng với model `hr.employee` từ module `hr_management`.
 
-```mermaid
-erDiagram
-    hr_employee {
-        float remaining_leaves
-        int leaves_manager_id
-        selection leaves_access_level
+**Chú thích:**
+- `+` : Thuộc tính/Phương thức công khai (public).
+- `-` : Thuộc tính/Phương thức riêng tư (private/protected).
+- `<<Model>>`: Biểu thị một model Odoo chuẩn.
+- `<<SQL View>>`: Biểu thị một model ảo được tạo từ câu lệnh SQL.
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "HR Management Module" {
+    class "hr.employee" as BaseEmployee {
+        + name: Char
+        + manager_id: Many2one
     }
-    hr_leaves_type {
-        string name
-        int sequence
-        selection requires_allocation
-        boolean unpaid
-    }
-    hr_leaves_allocation {
-        string name
-        selection state
-        int employee_id
-        int manager_id
-        int approver_id
-        int leaves_type_id
-        float duration
-        date date_from
-        date date_to
-        text reason
-        text response
-    }
-    hr_leaves_request {
-        string name
-        selection state
-        int employee_id
-        int manager_id
-        int approver_id
-        int leaves_type_id
-        date date_from
-        date date_to
-        float duration
-        text reason
-        text response
-    }
-    hr_public_leaves {
-        string name
-        date date_from
-        date date_to
-    }
-    hr_leaves_calendar {
-        string name
-        int employee_id
-        date date_from
-        date date_to
-        selection type
+}
+
+package "HR Leaves Module" {
+    class hr_employee <<Extension>> {
+        + remaining_leaves: Float
+        + leaves_manager_id: Many2one
+        + leaves_access_level: Selection
+        --
+        - _compute_remaining_leaves()
+        - _compute_leaves_manager()
+        + action_open_my_leaves()
     }
 
-    hr_employee ||--o{ hr_leaves_allocation : "submits,receives"
-    hr_employee ||--o{ hr_leaves_request : "submits,receives"
-    hr_leaves_type ||--o{ hr_leaves_allocation : "is of type"
-    hr_leaves_type ||--o{ hr_leaves_request : "is of type"
-    hr_leaves_calendar }o--|| hr_leaves_request : "displays for"
-    hr_leaves_calendar }o--|| hr_public_leaves : "includes"
+    class hr_leaves_request <<Model>> {
+        + employee_id: Many2one
+        + leaves_type_id: Many2one
+        + date_from: Date
+        + date_to: Date
+        + duration: Float
+        + state: Selection
+        --
+        - _compute_duration()
+        - _get_remaining_days()
+        - _check_overlapping_leaves()
+        + action_confirm()
+        + action_approve()
+        + action_refuse()
+    }
+
+    class hr_leaves_allocation <<Model>> {
+        + employee_id: Many2one
+        + leaves_type_id: Many2one
+        + duration: Float
+        + state: Selection
+        --
+        - _check_duration()
+        + action_confirm()
+        + action_approve()
+    }
+
+    class hr_leaves_type <<Model>> {
+        + name: Char
+        + requires_allocation: Selection
+        + unpaid: Boolean
+    }
+
+    class hr_public_leaves <<Model>> {
+        + name: Char
+        + date_from: Date
+        + date_to: Date
+        --
+        + get_public_leave_dates()
+    }
+    
+    class hr_leaves_calendar <<SQL View>> {
+        + name: Char
+        + employee_id: Many2one
+        + date_from: Date
+        + date_to: Date
+        + type: Selection
+    }
+}
+
+' Inheritance
+hr_employee --|> BaseEmployee
+
+' Relationships
+hr_leaves_request "n" -- "1" hr_employee : employee_id >
+hr_leaves_request "n" -- "1" hr_leaves_type : leaves_type_id >
+
+hr_leaves_allocation "n" -- "1" hr_employee : employee_id >
+hr_leaves_allocation "n" -- "1" hr_leaves_type : leaves_type_id >
+
+hr_leaves_calendar ..> hr_leaves_request : <<reads from>>
+hr_leaves_calendar ..> hr_public_leaves : <<reads from>>
+
+@enduml
 ```
 
 ## 2. Mô tả chi tiết các Model
@@ -175,3 +210,8 @@ Module `hr_leaves` thêm các trường và chức năng mới vào model `hr.em
 - **Smart Button "Leaves":**
   - Thêm một nút bấm trên form nhân viên, hiển thị số ngày phép còn lại.
   - Khi nhấn vào, nút sẽ mở danh sách tất cả các yêu cầu nghỉ phép của nhân viên đó (`action_open_my_leaves`).
+
+#### Ràng buộc Logic & Dữ liệu
+- **Logic trong `_inverse_leaves_access_level`: Kiểm tra và cập nhật quyền truy cập của người dùng dựa trên `leaves_access_level`.**
+  - Chỉ cho phép cập nhật `leaves_access_level` nếu người dùng hiện tại là Manager hoặc có quyền tương đương.
+  - Kiểm tra để không cho phép hạ quyền của Manager cuối cùng trong hệ thống.

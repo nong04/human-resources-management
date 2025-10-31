@@ -1,0 +1,13 @@
+<!-- /payroll_attendance/views/hr_public_leaves_views.xml -->
+<odoo>
+    <record id="hr_public_leaves_view_tree_inherit_payroll" model="ir.ui.view">
+        <field name="name">hr.public.leaves.tree.inherit.payroll</field>
+        <field name="model">hr.public.leaves</field>
+        <field name="inherit_id" ref="hr_leaves.hr_public_leaves_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='date_to']" position="after">
+                <field name="public_leaves_rate"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

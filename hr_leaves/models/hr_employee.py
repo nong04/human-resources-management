@@ -1,6 +1,6 @@
 # /hr_leaves/models/hr_employee.py
 from odoo import api, fields, models, _
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
@@ -66,6 +66,20 @@ class HrEmployee(models.Model):
             else:
                 employee.leaves_access_level = 'user'
 
+    @api.onchange('leaves_access_level')
+    def _onchange_leaves_access_level(self):
+        if not self._origin.id or not self.user_id:
+            return
+        is_current_user_manager = self.env.user.has_group('hr_leaves.group_hr_leaves_manager')
+        if is_current_user_manager and self.user_id == self.env.user and self.leaves_access_level == 'user':
+            return {
+                'warning': {
+                    'title': _("Confirmation"),
+                    'message': _(
+                        "You are about to change your own Leaves access level to User. You will lose your manager privileges upon saving."),
+                }
+            }
+
     def _inverse_leaves_access_level(self):
         if not self.env.user.has_group('hr_leaves.group_hr_leaves_manager'):
             raise AccessError(_("Only Leave Managers can change Leaves access levels."))
@@ -78,6 +92,10 @@ class HrEmployee(models.Model):
         for employee in self:
             if not employee.user_id:
                 continue
+
+            is_last_manager = len(manager_group.users) == 1 and employee.user_id in manager_group.users
+            if is_last_manager and employee.leaves_access_level == 'user':
+                raise UserError(_("You cannot remove the last Leave Manager (%s) from the system.") % employee.name)
 
             if not employee.user_id.has_group('hr_leaves.group_hr_leaves_user'):
                 user_group.sudo().users = [(4, employee.user_id.id)]

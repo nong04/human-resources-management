@@ -1,0 +1,26 @@
+<!-- /payroll_attendance/views/payroll_bonus_deduction_views.xml -->
+<odoo>
+    <record id="payroll_bonus_deduction_view_tree" model="ir.ui.view">
+        <field name="name">payroll.bonus.deduction.tree</field>
+        <field name="model">payroll.bonus.deduction</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="sequence"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="type"/>
+                <field name="computation_method"/>
+                <field name="currency_display_id" column_invisible="1"/>
+                <field name="amount_fixed_display" widget="monetary" invisible="computation_method != 'fixed'"/>
+                <field name="amount_percentage" invisible="computation_method != 'percentage'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="payroll_bonus_deduction_action" model="ir.actions.act_window">
+        <field name="name">Bonus/Deduction Rules</field>
+        <field name="res_model">payroll.bonus.deduction</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

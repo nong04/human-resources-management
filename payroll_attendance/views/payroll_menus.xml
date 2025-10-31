@@ -1,0 +1,56 @@
+<!-- /payroll_attendance/víews/payroll_menus.xml -->
+<odoo>
+    <menuitem
+        id="menu_payroll_root"
+        name="Payroll"
+        sequence="25"
+        groups="payroll_attendance.group_payroll_user"
+        web_icon="payroll_attendance,static/description/icon.png"/>
+
+    <menuitem
+        id="menu_payroll_payrolls"
+        name="Payrolls"
+        parent="menu_payroll_root"
+        action="payroll_payroll_action"
+        sequence="5"
+        groups="payroll_attendance.group_payroll_manager"/>
+
+    <menuitem
+        id="menu_payroll_payslips"
+        name="All Payslips"
+        parent="menu_payroll_root"
+        action="payroll_payslip_action"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_payroll_attendances"
+        name="Attendances"
+        parent="menu_payroll_root"
+        action="attendance_record_action"
+        sequence="15"/>
+
+    <menuitem
+        id="menu_payroll_config"
+        name="Configuration"
+        parent="menu_payroll_root"
+        sequence="100"
+        groups="payroll_attendance.group_payroll_manager"/>
+    <menuitem
+        id="menu_payroll_bonus_deduction_rules"
+        name="Bonus/Deduction Rules"
+        parent="menu_payroll_config"
+        action="payroll_bonus_deduction_action"
+        sequence="1"/>
+    <menuitem
+        id="menu_payroll_currencies"
+        name="Currencies"
+        parent="menu_payroll_config"
+        action="action_payroll_currencies"
+        sequence="2"/>
+    <menuitem
+        id="menu_payroll_settings"
+        name="Settings"
+        parent="menu_payroll_config"
+        action="action_payroll_config_settings"
+        sequence="3"/>
+</odoo>

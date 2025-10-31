@@ -1,0 +1,99 @@
+<!-- /payroll_attendance/demo/payroll_attendance_demo.xml -->
+<odoo>
+    <data>
+        <record id="hr_management.emp_manager_1" model="hr.employee">
+            <field name="base_salary">6000</field>
+            <field name="allowance">500</field>
+        </record>
+        <record id="hr_management.emp_user_1" model="hr.employee">
+            <field name="base_salary">3500</field>
+            <field name="allowance">250</field>
+        </record>
+        <record id="demo_att_mitchell_1" model="payroll.attendance.record">
+            <field name="employee_id" ref="hr_management.emp_manager_1"/>
+            <field name="check_in" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-04 08:55:00')"/>
+            <field name="check_out" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-04 17:35:00')"/>
+        </record>
+        <record id="demo_att_mitchell_2" model="payroll.attendance.record">
+            <field name="employee_id" ref="hr_management.emp_manager_1"/>
+            <field name="check_in" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-05 09:10:00')"/>
+            <field name="check_out" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-05 18:05:00')"/>
+        </record>
+        <record id="demo_att_abigail_1" model="payroll.attendance.record">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="check_in" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-04 08:01:00')"/>
+            <field name="check_out" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-04 17:05:00')"/>
+        </record>
+        <record id="demo_att_abigail_2" model="payroll.attendance.record">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="check_in" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-05 07:50:00')"/>
+            <field name="check_out" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-05 17:30:00')"/>
+        </record>
+        <record id="demo_att_abigail_3" model="payroll.attendance.record">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="check_in" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-06 08:00:00')"/>
+            <field name="check_out" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-06 12:30:00')"/>
+        </record>
+        <record id="demo_payroll_prev_month" model="payroll.payroll">
+            <field name="name" eval="'Salary for ' + (datetime.now() - relativedelta(months=1)).strftime('%B %Y')"/>
+            <field name="date_from" eval="(datetime.now() - relativedelta(months=1)).strftime('%Y-%m-01')"/>
+            <field name="date_to" eval="(datetime.now() - relativedelta(months=1)).strftime('%Y-%m-28')"/>
+            <field name="selection_mode">employee</field>
+            <field name="employee_ids" eval="[(6, 0, [ref('hr_management.emp_manager_1'), ref('hr_management.emp_user_1')])]"/>
+            <field name="line_ids" eval="[(0, 0, {
+                'rule_id': ref('payroll_attendance.rule_bonus_seniority_fixed'),
+                'quantity': 1,
+            })]"/>
+            <field name="state">done</field>
+        </record>
+
+        <record id="demo_payslip_mitchell" model="payroll.payslip">
+            <field name="employee_id" ref="hr_management.emp_manager_1"/>
+            <field name="payroll_id" ref="demo_payroll_prev_month"/>
+            <field name="date_from" eval="(datetime.now() - relativedelta(months=1)).strftime('%Y-%m-01')"/>
+            <field name="date_to" eval="(datetime.now() - relativedelta(months=1)).strftime('%Y-%m-28')"/>
+            <field name="standard_work_hours">160</field>
+            <field name="hourly_wage">37.5</field>
+            <field name="actual_worked_hours">17.25</field>
+            <field name="allowance">500</field>
+            <field name="base_pay">646.88</field>
+            <field name="net_salary">6146.88</field>
+            <field name="state">done</field>
+        </record>
+        <record id="demo_payslip_abigail" model="payroll.payslip">
+            <field name="employee_id" ref="hr_management.emp_user_1"/>
+            <field name="payroll_id" ref="demo_payroll_prev_month"/>
+            <field name="date_from" eval="(datetime.now() - relativedelta(months=1)).strftime('%Y-%m-01')"/>
+            <field name="date_to" eval="(datetime.now() - relativedelta(months=1)).strftime('%Y-%m-28')"/>
+            <field name="standard_work_hours">160</field>
+            <field name="hourly_wage">21.88</field>
+            <field name="actual_worked_hours">22.82</field>
+            <field name="overtime_hours">1.32</field>
+            <field name="overtime_pay">43.32</field>
+            <field name="allowance">250</field>
+            <field name="base_pay">500.00</field>
+            <field name="net_salary">4043.32</field>
+            <field name="state">done</field>
+        </record>
+        <record id="demo_payslip_line_mitchell_1" model="payroll.payslip.line">
+            <field name="slip_id" ref="demo_payslip_mitchell"/>
+            <field name="rule_id" ref="payroll_attendance.rule_bonus_seniority_fixed"/>
+            <field name="quantity">1</field>
+        </record>
+        <record id="demo_payslip_line_mitchell_2" model="payroll.payslip.line">
+            <field name="slip_id" ref="demo_payslip_mitchell"/>
+            <field name="rule_id" ref="payroll_attendance.rule_deduction_late_arrival_fixed"/>
+            <field name="quantity">2</field>
+        </record>
+        <record id="demo_payslip_line_abigail_1" model="payroll.payslip.line">
+            <field name="slip_id" ref="demo_payslip_abigail"/>
+            <field name="rule_id" ref="payroll_attendance.rule_bonus_seniority_fixed"/>
+            <field name="quantity">1</field>
+        </record>
+        <record id="demo_payslip_line_abigail_2" model="payroll.payslip.line">
+            <field name="slip_id" ref="demo_payslip_abigail"/>
+            <field name="rule_id" ref="payroll_attendance.rule_bonus_project_fixed"/>
+            <field name="quantity">1.5</field>
+        </record>
+    </data>
+</odoo>

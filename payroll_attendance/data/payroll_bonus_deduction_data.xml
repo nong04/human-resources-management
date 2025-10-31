@@ -1,0 +1,70 @@
+<!-- /payroll_attendance/data/payroll_bonus_deduction_data.xml -->
+<odoo>
+    <data noupdate="1">
+        <record id="rule_bonus_kpi_percentage" model="payroll.bonus.deduction">
+            <field name="name">KPI Bonus (Percentage)</field>
+            <field name="code">BONUS_KPI</field>
+            <field name="type">bonus</field>
+            <field name="computation_method">percentage</field>
+            <field name="amount_percentage">10.0</field>
+            <field name="amount_fixed">0</field>
+            <field name="sequence">1</field>
+        </record>
+        <record id="rule_bonus_seniority_fixed" model="payroll.bonus.deduction">
+            <field name="name">Seniority Bonus (Fixed)</field>
+            <field name="code">BONUS_SENIORITY</field>
+            <field name="type">bonus</field>
+            <field name="computation_method">fixed</field>
+            <field name="amount_percentage">0</field>
+            <field name="amount_fixed">50</field>
+            <field name="sequence">2</field>
+        </record>
+        <record id="rule_bonus_project_fixed" model="payroll.bonus.deduction">
+            <field name="name">Project Completion Bonus</field>
+            <field name="code">BONUS_PROJECT</field>
+            <field name="type">bonus</field>
+            <field name="computation_method">fixed</field>
+            <field name="amount_percentage">0</field>
+            <field name="amount_fixed">200</field>
+            <field name="sequence">3</field>
+        </record>
+
+        <record id="rule_deduction_late_arrival_fixed" model="payroll.bonus.deduction">
+            <field name="name">Penalty for Late Arrival</field>
+            <field name="code">DED_LATE</field>
+            <field name="type">deduction</field>
+            <field name="computation_method">fixed</field>
+            <field name="amount_percentage">0</field>
+            <field name="amount_fixed">5</field>
+            <field name="sequence">4</field>
+        </record>
+        <record id="rule_deduction_violation_fixed" model="payroll.bonus.deduction">
+            <field name="name">Penalty for Regulation Violation</field>
+            <field name="code">DED_VIOLATION</field>
+            <field name="type">deduction</field>
+            <field name="computation_method">fixed</field>
+            <field name="amount_percentage">0</field>
+            <field name="amount_fixed">10</field>
+            <field name="sequence">5</field>
+        </record>
+
+        <record id="rule_deduction_pit_percentage" model="payroll.bonus.deduction">
+            <field name="name">Personal Income Tax (PIT)</field>
+            <field name="code">DED_PIT</field>
+            <field name="type">deduction</field>
+            <field name="computation_method">percentage</field>
+            <field name="amount_percentage">10.0</field>
+            <field name="amount_fixed">0</field>
+            <field name="sequence">6</field>
+        </record>
+        <record id="rule_deduction_si_percentage" model="payroll.bonus.deduction">
+            <field name="name">Social Insurance (SI)</field>
+            <field name="code">DED_SI</field>
+            <field name="type">deduction</field>
+            <field name="computation_method">percentage</field>
+            <field name="amount_percentage">8.0</field>
+            <field name="amount_fixed">0</field>
+            <field name="sequence">7</field>
+        </record>
+    </data>
+</odoo>

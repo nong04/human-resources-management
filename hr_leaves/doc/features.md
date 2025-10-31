@@ -52,6 +52,8 @@ Module xây dựng một quy trình phê duyệt rõ ràng và hệ thống phâ
 - **Record Rules (Quy tắc Truy cập Dữ liệu):**
   - **User (`group_hr_leaves_user`):** Chỉ có thể thấy các yêu cầu/cấp phát có `domain_force` là `['|', ('employee_id.user_id', '=', user.id), ('employee_id.leaves_manager_id', '=', user.id)]`. Điều này cho phép quản lý cấp trung xem yêu cầu của team mình mà không cần quyền Manager toàn hệ thống.
   - **Manager (`group_hr_leaves_manager`):** Có thể thấy tất cả yêu cầu/cấp phát trong toàn bộ công ty.
+- **Ràng buộc an toàn:**
+  - Hệ thống sẽ ngăn chặn việc hạ quyền của người quản lý cuối cùng trong hệ thống để tránh trường hợp không còn ai có quyền quản trị.
 
 ### 2.3. Chống Trùng lặp
 

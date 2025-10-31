@@ -1,0 +1,27 @@
+<!-- /payroll_attendance/static/src/xml/payroll_systray.xml -->
+<templates xml:space="preserve">
+   <t t-name="payroll_attendance.PayrollAttendanceSystray" owl="1">
+       <t t-if="state.isEmployee">
+           <Dropdown togglerClass="'o_payroll_attendance_systray'">
+               <t t-set-slot="toggler">
+                   <i class="fa fa-circle"
+                      t-att-class="{
+                        'text-success': state.status === 'checked_in',
+                        'text-danger': state.status === 'checked_out',
+                       }"
+                      t-att-title="state.status === 'checked_in' ? 'Checked In' : 'Checked Out'"
+                      role="img"
+                   />
+               </t>
+               <t t-set-slot="default">
+                   <DropdownItem>
+                       <div t-on-click="onAttendanceChange" class="o_payroll_attendance_dropdown_item">
+                           <t t-if="state.status === 'checked_in'">Check Out</t>
+                           <t t-else="">Check In</t>
+                       </div>
+                   </DropdownItem>
+               </t>
+           </Dropdown>
+       </t>
+   </t>
+</templates>

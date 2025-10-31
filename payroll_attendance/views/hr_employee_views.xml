@@ -1,0 +1,31 @@
+<!-- /payroll_attendance/víews/hr_employee_views.xml -->
+<odoo>
+    <record id="hr_employee_view_form_inherit_payroll" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.payroll</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_management.hr_employee_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='hr_settings']" position="after">
+                <page name="payroll_settings" string="Payroll">
+                    <group>
+                        <group string="Salary Information">
+                            <field name="currency_display_id" invisible="1"/>
+                            <field name="base_salary_display"/>
+                            <field name="allowance_display"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="hr_employee_view_form_inherit_payroll_access" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.payroll.access</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_management.hr_employee_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='leaves_access_level']" position="after">
+                <field name="payroll_access_level" readonly="not is_manager"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

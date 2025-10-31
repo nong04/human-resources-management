@@ -1,0 +1,17 @@
+<!-- /payroll_attendance/views/res_currency_views.xml -->
+<odoo>
+    <record id="action_payroll_currencies" model="ir.actions.act_window">
+        <field name="name">Currencies</field>
+        <field name="res_model">res.currency</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No currencies found.
+            </p><p>
+                This view allows you to activate or deactivate currencies for use in the Payroll module.
+                Use the 'Action' menu to Archive or Unarchive selected currencies.
+            </p>
+        </field>
+    </record>
+</odoo>

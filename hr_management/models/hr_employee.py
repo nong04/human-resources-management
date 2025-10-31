@@ -1,4 +1,6 @@
 # /hr_management/models/hr_employee.py
+from importlib.metadata import requires
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, AccessError, ValidationError
 import logging
@@ -41,7 +43,7 @@ class HrEmployee(models.Model):
     gender = fields.Selection([('male', 'Male'), ('female', 'Female'), ('other', 'Other')], string='Gender', tracking=True)
     birthday = fields.Date(string='Date of Birth', tracking=True, help="The employee's birth date. It should not be in the future.")
     nationality = fields.Many2one('res.country', string='Nationality', tracking=True)
-    identification_id = fields.Char(string='Identification No', tracking=True)
+    identification_id = fields.Char(string='Identification No', required=True, tracking=True)
     passport_id = fields.Char('Passport No', tracking=True)
     certificate = fields.Selection([
         ('graduate', 'Graduate'), ('bachelor', 'Bachelor'),
@@ -62,6 +64,7 @@ class HrEmployee(models.Model):
     _sql_constraints = [
         ('work_email_uniq', 'unique(work_email)', 'An employee work email must be unique.'),
         ('user_uniq', 'unique(user_id)', 'A user can only be linked to one employee.'),
+        ('identification_id_uniq', 'unique(identification_id)', 'An employee identification number must be unique.'),
     ]
 
     @api.model

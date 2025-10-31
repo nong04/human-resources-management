@@ -1,0 +1,69 @@
+<!-- /payroll_attendance/views/res_config_settings_views.xml -->
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.payroll</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="90"/>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                    <app data-string="Payroll" string="Payroll" name="payroll_attendance" groups="hr_management.group_hr_management_manager">
+                        <block title="General Settings">
+                            <setting string="Payroll Currency" help="Main currency for all payroll operations.">
+                                <field name="payroll_currency_id"/>
+                            </setting>
+                        </block>
+                        <block title="Tolerance &amp; Overtime">
+                            <setting string="Overtime Tolerance" help="Time worked beyond standard hours will be counted as OT only after this tolerance (in minutes).">
+                                <field name="overtime_tolerance" class="text-center" style="width: 10%;"/>
+                                <span> Minutes</span>
+                            </setting>
+                            <setting string="Overtime Rate" help="Set the salary multiplier for overtime hours (e.g., 1.5 for 150%).">
+                                <field name="payroll_overtime_rate" class="text-center" style="width: 10%;"/>
+                            </setting>
+                            <setting string="Undertime Tolerance" help="Time not worked will be considered undertime only after this tolerance (in minutes).">
+                                <field name="undertime_tolerance" class="text-center" style="width: 10%;"/>
+                                <span> Minutes</span>
+                            </setting>
+                        </block>
+                        <block title="Leave Policies">
+                            <setting string="Working on Paid Leave" help="Define how to handle work done during paid leave periods.">
+                                <div>
+                                    <field name="policy_paid_leave_allow_work"/>
+                                    <label for="policy_paid_leave_allow_work"/>
+                                </div>
+                                <div invisible="not policy_paid_leave_allow_work" class="ps-5">
+                                    <field name="policy_paid_leave_deduct_leave"/>
+                                    <label for="policy_paid_leave_deduct_leave"/>
+                                </div>
+                                <div invisible="not policy_paid_leave_allow_work" class="ps-5">
+                                    <field name="policy_paid_leave_as_ot"/>
+                                    <label for="policy_paid_leave_as_ot"/>
+                                </div>
+                            </setting>
+                             <setting string="Working on Unpaid Leave" help="Define how to handle work done during unpaid leave periods.">
+                                <div>
+                                    <field name="policy_unpaid_leave_allow_work"/>
+                                    <label for="policy_unpaid_leave_allow_work"/>
+                                </div>
+                                <div invisible="not policy_unpaid_leave_allow_work" class="ps-5">
+                                    <field name="policy_unpaid_leave_as_ot"/>
+                                    <label for="policy_unpaid_leave_as_ot"/>
+                                </div>
+                            </setting>
+                        </block>
+                    </app>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_payroll_config_settings" model="ir.actions.act_window">
+            <field name="name">Settings</field>
+            <field name="res_model">res.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+            <field name="context">{'module' : 'payroll_attendance'}</field>
+        </record>
+    </data>
+</odoo>

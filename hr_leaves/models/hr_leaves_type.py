@@ -20,6 +20,8 @@ class HrLeavesType(models.Model):
     ]
 
     def write(self, vals):
+        if self.env.context.get('install_mode') or self.env.context.get('update_module'):
+            return super().write(vals)
         disallowed = set(vals.keys()) - {'sequence'}
         if disallowed:
             raise ValidationError(_("Editing existing leave types is not allowed. You can create or delete records instead."))

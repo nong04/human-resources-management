@@ -1,0 +1,15 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_payroll_payslip_user,payroll.payslip.user,model_payroll_payslip,group_payroll_user,1,0,0,0
+access_payroll_payslip_manager,payroll.payslip.manager,model_payroll_payslip,group_payroll_manager,1,1,1,1
+access_payroll_attendance_record_user,payroll.attendance.record.user,model_payroll_attendance_record,group_payroll_user,1,1,1,1
+access_payroll_attendance_record_manager,payroll.attendance.record.manager,model_payroll_attendance_record,group_payroll_manager,1,1,1,1
+access_payroll_payroll_user,payroll.payroll.user,model_payroll_payroll,group_payroll_user,0,0,0,0
+access_payroll_payroll_manager,payroll.payroll.manager,model_payroll_payroll,group_payroll_manager,1,1,1,1
+access_payroll_bonus_deduction_user,payroll.bonus.deduction.user,model_payroll_bonus_deduction,group_payroll_user,1,0,0,0
+access_payroll_bonus_deduction_manager,payroll.bonus.deduction.manager,model_payroll_bonus_deduction,group_payroll_manager,1,1,1,1
+access_payroll_payslip_line_user,payroll.payslip.line.user,model_payroll_payslip_line,group_payroll_user,1,0,0,0
+access_payroll_payslip_line_manager,payroll.payslip.line.manager,model_payroll_payslip_line,group_payroll_manager,1,1,1,1
+access_payroll_payroll_line_user,payroll.payroll.line.user,model_payroll_payroll_line,group_payroll_user,0,0,0,0
+access_payroll_payroll_line_manager,payroll.payroll.line.manager,model_payroll_payroll_line,group_payroll_manager,1,1,1,1
+access_res_currency_payroll_user,res.currency payroll user,base.model_res_currency,payroll_attendance.group_payroll_user,0,0,0,0
+access_res_currency_payroll_manager,res.currency payroll manager,base.model_res_currency,payroll_attendance.group_payroll_manager,1,1,1,1

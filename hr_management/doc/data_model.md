@@ -2,78 +2,106 @@
 
 Tài liệu này phân tích chi tiết cấu trúc dữ liệu của module **HR Management**, bao gồm các model, trường dữ liệu, mối quan hệ và các ràng buộc logic.
 
-## 1. Sơ đồ Quan hệ Dữ liệu (ERD)
+## 1. Sơ đồ Lớp UML (UML Class Diagram)
 
-*(Sơ đồ này minh họa mối quan hệ giữa các model chính)*
+Sơ đồ dưới đây minh họa cấu trúc hướng đối tượng của các model trong module. Nó thể hiện rõ các thuộc tính (fields), phương thức (methods) quan trọng, các mối quan hệ và tính kế thừa.
 
-```mermaid
-erDiagram
-    hr_department {
-        string name
-        bool active
-        int manager_id
-        int parent_id
-        int employee_department_count
-    }
-    hr_job {
-        string name
-        bool active
-        int department_id
-        int employee_ids
-        int employees_job_count
-    }
-    hr_employee {
-        int department_id
-        int job_id
-        int manager_id
-        int user_id
-        int resource_calendar_id
-        int nationality
-        string name
-        bool active
-        image image_1920
-        string work_email
-        string work_phone
-        string work_mobile
-        string work_location
-        date work_start_date
-        date work_end_date
-        selection tz
-        string private_address
-        string email
-        string phone
-        selection language
-        selection gender
-        date birthday
-        string identification_id
-        string passport_id
-        selection certificate
-        string study_field
-        string study_school
-        selection management_access_level
-        selection employee_type
-        selection work_status
-    }
-    res_users {
-        int employee_id
-        string name
-        string login
-    }
-    hr_access_request {
-        int employee_id
-        int user_id
-        selection requested_level
-        selection state
+**Chú thích:**
+- `+` : Thuộc tính/Phương thức công khai (public).
+- `-` : Thuộc tính/Phương thức riêng tư (private/protected), thường là các hàm `_compute`, `_check`, `_onchange`.
+- `<<Model>>`: Biểu thị một model Odoo chuẩn.
+- `<<Transient>>`: Biểu thị một model Odoo tạm thời (`models.TransientModel`).
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Odoo Base Models" {
+    class "res.users" as BaseUsers
+    class "res.config.settings" as BaseConfig
+}
+
+package "HR Management Module" {
+    class hr_employee <<Model>> {
+        + name: Char
+        + work_email: Char
+        + department_id: Many2one
+        + job_id: Many2one
+        + manager_id: Many2one
+        + user_id: Many2one
+        + management_access_level: Selection
+        + work_status: Selection
+        --
+        - _compute_is_manager()
+        - _compute_is_self()
+        - _compute_management_access_level()
+        - _inverse_management_access_level()
+        - _check_birthday()
+        - _check_manager_coach()
+        + _create_user_from_employee()
+        + action_related_user()
     }
 
-    hr_job }o--|| hr_department : "belongs to"
-    hr_job ||--o{ hr_employee : "has"
-    hr_department ||--o{ hr_employee : "has"
-    hr_employee ||--|| hr_department : "manages"
-    hr_department }|--|| hr_department : "child of"
-    res_users ||--|| hr_employee : "linked to"
-    res_users ||--o{ hr_access_request : "requests"
-    hr_employee ||--o{ hr_access_request : "makes"
+    class hr_department <<Model>> {
+        + name: Char
+        + manager_id: Many2one
+        + parent_id: Many2one
+        + child_ids: One2many
+        + member_ids: One2many
+        --
+        - _compute_employee_department()
+        - _check_department_recursion()
+        + action_open_employees()
+    }
+
+    class hr_job <<Model>> {
+        + name: Char
+        - department_id: Many2one
+        + employee_ids: One2many
+        --
+        - _compute_employee_job()
+        + action_open_employees()
+    }
+
+    class hr_access_request <<Model>> {
+        + employee_id: Many2one
+        + requested_level: Selection
+        + state: Selection
+        --
+        - _validate_employee_access_request()
+        + action_approve()
+        + action_refuse()
+    }
+
+    class res_users <<Extension>> {
+        + employee_id: Many2one
+        + work_phone: Char (related)
+        + department_id: Many2one (related)
+    }
+
+    class res_config_settings <<Transient>> {
+        + auto_create_user_on_employee: Boolean
+    }
+}
+
+' Relationships
+hr_employee "n" -- "0..1" hr_department : department_id >
+hr_employee "n" -- "0..1" hr_job : job_id >
+hr_employee "n" -- "0..1" hr_employee : manager_id >
+hr_employee "1" -- "0..1" BaseUsers : user_id >
+hr_department "1" -- "n" hr_employee : member_ids
+hr_department "n" -- "0..1" hr_employee : manager_id >
+hr_department "n" -- "0..1" hr_department : parent_id >
+hr_job "n" -- "0..1" hr_department : department_id >
+hr_access_request "n" -- "1" hr_employee : employee_id >
+
+' Inheritance / Extension
+res_users ..|> BaseUsers : <<inherits>>
+res_config_settings ..|> BaseConfig : <<inherits>>
+res_users ..> hr_employee : <<related fields>>
+
+@enduml
 ```
 
 ## 2. Mô tả chi tiết các Model
@@ -123,6 +151,7 @@ Model trung tâm lưu trữ hồ sơ nhân sự. Kế thừa từ `mail.thread`,
 - **SQL Constraints (`_sql_constraints`):**
   - `work_email_uniq`: `work_email` phải là duy nhất.
   - `user_uniq`: `user_id` phải là duy nhất.
+  - `identification_id_uniq`: `identification_id` phải là duy nhất.
 - **Python Constraints (`@api.constrains`):**
   - `_check_birthday`: `birthday` không được ở tương lai.
   - `_check_manager_coach`: `manager_id` và `coach_id` không được là chính nhân viên đó.
