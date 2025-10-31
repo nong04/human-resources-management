@@ -89,3 +89,97 @@ Các bước này cần được thực hiện trước khi chạy kỳ lương 
 5.  **Xuất Báo cáo:** Nhấn **Export Excel** để tải về file báo cáo lương của cả Bảng lương.
 
 ![Quy trình các nút trên Bảng lương](images/payroll_payroll_form2.png)
+
+---
+
+# User Guide - Payroll & Attendance
+
+This document provides detailed instructions for the main business processes in the **Payroll & Attendance** module, from configuration and daily attendance to running monthly payroll.
+
+## 1. For Administrators & HR Managers (Initial Setup)
+
+These steps should be completed before running the first payroll period.
+
+### 1.1. System Configuration
+1.  **Navigate:** Go to the **Payroll -> Configuration -> Settings** menu.
+2.  **Set Parameters:**
+    - **Payroll Currency:** Choose the main currency that will be displayed on all payroll interfaces.
+    - **Overtime Tolerance:** Set the grace period in minutes before work time is considered overtime (OT).
+    - **Overtime Rate:** Set the salary multiplier for overtime hours (e.g., 1.5 for 150%).
+    - **Leave Policies:** Configure policies for handling cases where an employee works on a leave day.
+3.  **Save.**
+
+![Payroll Configuration Interface](images/payroll_settings.png)
+
+### 1.2. Define Bonus/Deduction Rules
+1.  **Navigate:** Go to the **Payroll -> Configuration -> Bonus/Deduction Rules** menu.
+2.  **Create New:** The interface allows for direct creation and editing in the list view.
+3.  **Enter Information:**
+    - **Name & Code:** Rule name and code (e.g., "KPI Bonus", "KPI_BONUS").
+    - **Type:** Choose `Bonus` (adds to salary) or `Deduction` (subtracts from salary).
+    - **Computation Method:** Choose `Fixed Amount` or `Percentage of Gross Salary`.
+    - **Amount:** Enter the corresponding amount or percentage rate.
+4.  **Save.**
+
+![Bonus/Deduction Rules List](images/payroll_bonus_deduction_rules.png)
+
+### 1.3. Update Employee Salary
+1.  **Navigate:** Go to **HR Management -> Employees**, and open an employee's profile.
+2.  **Go to the Payroll tab:**
+    - **Base Salary:** Enter the basic monthly salary.
+    - **Allowance:** Enter any fixed monthly allowances.
+3.  **Save.**
+
+![Employee Profile Form - Payroll Tab](images/hr_employee_payroll.png)
+
+## 2. For All Employees (Daily)
+
+### 2.1. Attendance (Check-in / Check-out)
+1.  **Use the Systray:** On Odoo's top toolbar, find the attendance icon (a circle).
+    - **Red:** You are `checked out`.
+    - **Green:** You are `checked in`.
+2.  **Perform Action:**
+    - Click the icon, then select **Check In** when you start working.
+    - Click the icon, then select **Check Out** when you finish working.
+
+![Attendance Widget on Systray](images/payroll_systray.png)
+
+### 2.2. View Attendance History and Payslips
+- **View Attendance:**
+  1.  **Navigate:** Go to the **Payroll -> Attendances** menu.
+  2.  Use the **My Attendances** filter to see your attendance records.
+
+![Employee's Attendance List](images/payroll_attendance_record.png)
+
+- **View Payslips:**
+  1.  **Navigate:** Go to the **Payroll -> All Payslips** menu.
+  2.  Use the **My Payslips** filter to see your payslips that have been confirmed by the HR department.
+
+![Employee's Payslip List](images/payroll_payslip.png)
+
+## 3. For HR Managers (Monthly)
+
+This is the main process for calculating and issuing employee salaries.
+
+### 3.1. Create a Payroll (`payroll.payroll`)
+1.  **Navigate:** Go to the **Payroll -> Payrolls** menu.
+2.  **Create New:** Click **New**.
+3.  **Enter Basic Information:**
+    - **Name:** Name of the payroll run (e.g., "Salary for August 2025").
+    - **Period:** Select the start and end dates of the pay period.
+4.  **Select Employees:**
+    - **Selection Mode:** Choose `By Department` (to select entire departments) or `By Employee` (to select individual employees).
+    - Select the corresponding departments or employees.
+5.  **(Optional) Add General Bonuses/Deductions:** Go to the **Bonuses & Deductions** tab to add rules that will apply to everyone in this payroll.
+6.  **Save.**
+
+![Create Payroll Form](images/payroll_payroll_form.png)
+
+### 3.2. Process and Finalize the Payroll
+1.  **Generate Payslips:** Open the newly created Payroll and click the **Generate Payslips** button. The system will create the child payslips in the `draft` state.
+2.  **(Optional) Individual Adjustments:** Click the **Payslips** smart button to see the list. Open individual payslips to add specific bonuses or deductions for each person if needed.
+3.  **Calculate:** Return to the Payroll form and click **Compute All**. The system will run the salary calculation logic for all payslips.
+4.  **Confirm:** After reviewing, click **Confirm All**. All payslips will be moved to the `done` state and locked.
+5.  **Export Report:** Click **Export Excel** to download the salary report file for the entire Payroll.
+
+![Button Workflow on Payroll Form](images/payroll_payroll_form2.png)

@@ -103,3 +103,111 @@ Quản lý có thể xem tổng quan lịch nghỉ của các thành viên để
 3.  Lịch sẽ hiển thị các yêu cầu nghỉ phép đã được duyệt của team bạn (màu theo từng nhân viên) và cả các ngày nghỉ lễ chung của công ty. Điều này giúp bạn có cái nhìn tổng quan về sự vắng mặt của các thành viên.
 
 ![Lịch nghỉ Tổng quan](images/leaves_overview_calendar.png)
+
+---
+
+# User Guide - Leave Management
+
+This document provides detailed instructions for the main business processes in the **Leave Management** module, from initial configuration to submitting and approving leave requests.
+
+## 1. For HR Managers
+
+These steps are typically performed once when setting up the system or when there are changes in company policy.
+
+### 1.1. Configure Leave Types
+
+First, you need to define the types of leave that the company uses.
+
+1.  **Navigate:** Go to the **HR Leaves -> Configuration -> Leave Types** menu.
+2.  **Create/Edit:** The interface is an editable list view. Click **New** to add a new leave type.
+3.  **Enter Information:**
+    - **Leave Type:** The name of the leave (e.g., "Annual Leave", "Sick Leave", "Marriage Leave").
+    - **Requires Allocation:**
+        - Select `Yes` if this is a limited type of leave that needs to be allocated (e.g., Annual Leave).
+        - Select `No Limit` if this is an unlimited type of leave (e.g., Unpaid Leave).
+    - **Is Unpaid:** Check this box if this is an unpaid leave type.
+4.  **Save.** Repeat for all company leave types.
+
+![Leave Types configuration interface](images/leave_types_config.png)
+
+### 1.2. Configure Public Holidays
+
+Declare general public holidays so the system can automatically exclude them when calculating leave duration.
+
+1.  **Navigate:** Go to the **HR Leaves -> Configuration -> Public Leaves** menu.
+2.  **Create:** Click **New**.
+3.  **Enter Information:**
+    - **Name:** The name of the holiday (e.g., "National Day").
+    - **Start Date** and **End Date:** Select the start and end dates of the holiday period.
+4.  **Save.**
+
+![Public Holidays configuration interface](images/public_leaves_config.png)
+
+### 1.3. Allocate Leave Days to Employees
+
+For leave types that require allocation (like annual leave), you need to perform this step to "load" leave days for employees.
+
+1.  **Navigate:** Go to the **HR Leaves -> Leave Allocations** menu.
+2.  **Create:** Click **New**.
+3.  **Enter Information:**
+    - **Employee:** Select the employee or group of employees to allocate leave to.
+    - **Leave Type:** Choose the leave type to allocate (e.g., "Annual Leave").
+    - **Duration:** Enter the number of leave days to be allocated (e.g., 12).
+    - **Validity Period:** Define the validity period for these leave days (e.g., from 01/01/2024 to 31/12/2024).
+4.  **Save and Approve:**
+    - Click **Save**, then click **Submit**.
+    - Click **Approve** to officially grant the leave days to the employee.
+
+![Leave Allocation Form](images/leave_allocation_form.png)
+
+## 2. For All Employees
+
+### 2.1. Submit a Leave Request
+
+When needing time off, employees can easily create a request in the system.
+
+1.  **Navigate:** Go to the **HR Leaves -> Leave Requests** menu.
+2.  **Create:** Click **New**.
+3.  **Enter Information:**
+    - **Leave Type:** Choose the type of leave you want to request.
+    - **Dates:** Select the start and end dates of your leave. The system will automatically calculate the **Duration** (actual working days, excluding weekends and holidays).
+    - **Reason:** Enter the reason for your leave request.
+4.  **Submit Request:** Click **Save**, then click **Submit**. Your request will be sent to your manager for approval.
+
+![Leave Request Form](images/leave_request_form.png)
+
+### 2.2. Track Requests and Leave Balance
+
+-   **Track Status:** In the **Leave Requests** list, you can see the status of your requests (To Approve, Approved, Refused). Use the **My Requests** filter for a quick view.
+-   **Check Leave Balance:**
+    1.  Go to the **HR Management -> Employees** menu.
+    2.  Find and open your profile.
+    3.  At the top center of the screen, the **Leaves** button will display your remaining leave days (for types that require allocation).
+
+![Employee Profile with Leave Balance](images/employee_leaves_balance.png)
+
+## 3. For Line Managers
+
+### 3.1. Approve Leave Requests
+
+Managers are responsible for reviewing and responding to leave requests from their team.
+
+1.  **Get Notified:** When a new request is submitted, you will receive a notification in Odoo (via the "Activities" clock icon).
+2.  **Navigate:** Go to the **HR Leaves -> Leave Requests** menu.
+3.  **Filter Requests:** Use the **To Approve** filter in the search bar to see requests pending your approval. You can also use the **My Team's Requests** filter to see all requests from your team.
+4.  **Review and Decide:**
+    - Open the request to view details (reason, dates, leave type).
+    - Click **Approve** to grant the request.
+    - Click **Refuse** to deny it. You can write a reason for refusal in the chatter below.
+
+![Leave Approval Interface](images/leave_approval_view.png)
+
+### 3.2. View Team's Leave Calendar
+
+Managers can get an overview of their team's leave schedule to plan work accordingly.
+
+1.  **Navigate:** Go to the **HR Leaves -> Overview** menu.
+2.  **Calendar View:** The default view is a monthly calendar.
+3.  The calendar will display approved leave requests for your team (colored by employee) as well as company-wide public holidays, giving you a comprehensive view of team members' absences.
+
+![Leave Overview Calendar](images/leaves_overview_calendar.png)

@@ -218,3 +218,226 @@ Model quản lý quy trình xin nâng cấp quyền.
   - Ghi đè phương thức `write` để kích hoạt đồng bộ hóa dữ liệu hai chiều với `hr.employee`.
 - **Cài đặt (`res.config.settings`):**
   - Thêm trường `auto_create_user_on_employee` (Boolean) để lưu cấu hình hệ thống vào `ir.config_parameter`.
+
+---
+
+# Data Model - HR Management
+
+This document provides a detailed analysis of the data structure of the **HR Management** module, including models, fields, relationships, and logical constraints.
+
+## 1. UML Class Diagram
+
+The diagram below illustrates the object-oriented structure of the models in the module. It clearly shows important attributes (fields), methods, relationships, and inheritance.
+
+**Legend:**
+- `+` : Public attribute/method.
+- `-` : Private/protected attribute/method, typically `_compute`, `_check`, `_onchange` functions.
+- `<<Model>>`: Represents a standard Odoo model.
+- `<<Transient>>`: Represents a temporary Odoo model (`models.TransientModel`).
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Odoo Base Models" {
+    class "res.users" as BaseUsers
+    class "res.config.settings" as BaseConfig
+}
+
+package "HR Management Module" {
+    class hr_employee <<Model>> {
+        + name: Char
+        + work_email: Char
+        + department_id: Many2one
+        + job_id: Many2one
+        + manager_id: Many2one
+        + user_id: Many2one
+        + management_access_level: Selection
+        + work_status: Selection
+        --
+        - _compute_is_manager()
+        - _compute_is_self()
+        - _compute_management_access_level()
+        - _inverse_management_access_level()
+        - _check_birthday()
+        - _check_manager_coach()
+        + _create_user_from_employee()
+        + action_related_user()
+    }
+
+    class hr_department <<Model>> {
+        + name: Char
+        + manager_id: Many2one
+        + parent_id: Many2one
+        + child_ids: One2many
+        + member_ids: One2many
+        --
+        - _compute_employee_department()
+        - _check_department_recursion()
+        + action_open_employees()
+    }
+
+    class hr_job <<Model>> {
+        + name: Char
+        - department_id: Many2one
+        + employee_ids: One2many
+        --
+        - _compute_employee_job()
+        + action_open_employees()
+    }
+
+    class hr_access_request <<Model>> {
+        + employee_id: Many2one
+        + requested_level: Selection
+        + state: Selection
+        --
+        - _validate_employee_access_request()
+        + action_approve()
+        + action_refuse()
+    }
+
+    class res_users <<Extension>> {
+        + employee_id: Many2one
+        + work_phone: Char (related)
+        + department_id: Many2one (related)
+    }
+
+    class res_config_settings <<Transient>> {
+        + auto_create_user_on_employee: Boolean
+    }
+}
+
+' Relationships
+hr_employee "n" -- "0..1" hr_department : department_id >
+hr_employee "n" -- "0..1" hr_job : job_id >
+hr_employee "n" -- "0..1" hr_employee : manager_id >
+hr_employee "1" -- "0..1" BaseUsers : user_id >
+hr_department "1" -- "n" hr_employee : member_ids
+hr_department "n" -- "0..1" hr_employee : manager_id >
+hr_department "n" -- "0..1" hr_department : parent_id >
+hr_job "n" -- "0..1" hr_department : department_id >
+hr_access_request "n" -- "1" hr_employee : employee_id >
+
+' Inheritance / Extension
+res_users ..|> BaseUsers : <<inherits>>
+res_config_settings ..|> BaseConfig : <<inherits>>
+res_users ..> hr_employee : <<related fields>>
+
+@enduml
+```
+
+## 2. Detailed Model Descriptions
+
+### 2.1. Employee (`hr.employee`)
+
+The central model for storing employee records. Inherits from `mail.thread`, `mail.activity.mixin`, and `resource.mixin`.
+
+#### Data Fields
+- **General & Work Information:**
+  - `name` (Char): Employee's name (linked to `resource.resource`).
+  - `active` (Boolean): Active status (linked to `resource.resource`).
+  - `image_1920` (Image): Profile picture.
+  - `work_email` (Char): Work email.
+  - `work_phone`, `work_mobile` (Char): Work phone numbers.
+  - `department_id` (Many2one -> `hr.department`): Department (required).
+  - `job_id` (Many2one -> `hr.job`): Job position (required).
+  - `manager_id` (Many2one -> `hr.employee`): Direct manager.
+  - `coach_id` (Many2one -> `hr.employee`): Coach.
+  - `work_location` (Char): Work location.
+  - `work_start_date`, `work_end_date` (Date): Start/end date of employment.
+  - `resource_calendar_id` (Many2one -> `resource.calendar`): Working schedule.
+  - `tz` (Selection): Timezone (linked to `resource.resource`).
+
+- **Personal Information:**
+  - `private_address` (Char): Private address.
+  - `email` (Char): Private email (required).
+  - `phone` (Char): Private phone.
+  - `language` (Selection): Language.
+  - `gender` (Selection): Gender (`male`, `female`, `other`).
+  - `birthday` (Date): Date of birth.
+  - `nationality` (Many2one -> `res.country`): Nationality.
+  - `identification_id`, `passport_id` (Char): ID/Passport number.
+  - `certificate`, `study_field`, `study_school` (Char/Selection): Education information.
+
+- **Settings & Permissions:**
+  - `user_id` (Many2one -> `res.users`): Link to the user account.
+  - `management_access_level` (Selection): Access level in the module (`user`, `manager`).
+  - `employee_type` (Selection): Employee type (`employee`, `contractor`, etc.).
+  - `work_status` (Selection): Work status (`active`, `left`).
+
+- **Compute Fields:**
+  - `is_manager` (Boolean): Checks if the current user is a Manager.
+  - `is_self` (Boolean): Checks if the employee profile being viewed belongs to the current user.
+
+#### Logic & Data Constraints
+- **SQL Constraints (`_sql_constraints`):**
+  - `work_email_uniq`: `work_email` must be unique.
+  - `user_uniq`: `user_id` must be unique.
+  - `identification_id_uniq`: `identification_id` must be unique.
+- **Python Constraints (`@api.constrains`):**
+  - `_check_birthday`: `birthday` cannot be in the future.
+  - `_check_manager_coach`: `manager_id` and `coach_id` cannot be the employee themselves.
+  - `_check_work_dates`: `work_end_date` must be after or equal to `work_start_date`.
+- **Logic in `_inverse_management_access_level`: Checks and updates the user's access rights based on `management_access_level`.**
+  - Only allows updating `management_access_level` if the current user is a Manager or has equivalent rights.
+  - Prevents demoting the last Manager in the system.
+
+### 2.2. Department (`hr.department`)
+
+Defines the organizational structure. Inherits from `mail.thread`.
+
+#### Data Fields
+- `name` (Char): Department name (required).
+- `active` (Boolean): Active status.
+- `manager_id` (Many2one -> `hr.employee`): Manager of the department.
+- `parent_id` (Many2one -> `hr.department`): Parent department.
+- `parent_path` (Char): Stores the tree path for query optimization.
+- `child_ids` (One2many -> `hr.department`): List of child departments.
+- `member_ids` (One2many -> `hr.employee`): List of employees.
+- `employee_department_count` (Integer): Computed field, counts the number of employees.
+
+#### Logic & Data Constraints
+- **Python Constraints (`@api.constrains`):**
+  - `_check_department_recursion`: Prevents creating recursive loops in the tree structure.
+  - `_check_manager`: `manager_id` must be an employee with `work_status` = 'active'.
+
+### 2.3. Job Position (`hr.job`)
+
+Defines job titles. Inherits from `mail.thread`.
+
+#### Data Fields
+- `name` (Char): Position name (required).
+- `active` (Boolean): Active status.
+- `department_id` (Many2one -> `hr.department`): Related department.
+- `employee_ids` (One2many -> `hr.employee`): List of employees holding this position.
+- `employees_job_count` (Integer): Computed field, counts the number of employees.
+
+#### Logic & Data Constraints
+- **SQL Constraints (`_sql_constraints`):**
+  - `name_department_uniq`: The pair (`name`, `department_id`) must be unique.
+
+### 2.4. Access Request (`hr.access.request`)
+
+Manages the process for requesting elevated permissions.
+
+#### Data Fields
+- `employee_id` (Many2one -> `hr.employee`): Employee submitting the request (required).
+- `user_id` (Many2one -> `res.users`): Related user (computed from `employee_id`).
+- `requested_level` (Selection): Requested access level (`user`, `manager`).
+- `state` (Selection): Workflow state (`draft`, `confirm`, `approved`, `refused`).
+
+#### Logic & Data Constraints
+- **Logic in `create` and `write`:**
+  - `_validate_employee_access_request`: Checks if the employee has a user, if there's a pending duplicate request, and if they are requesting a level they already have.
+- **Logic in `action_approve` and `action_refuse`:**
+  - `_validate_request_state`: Ensures only requests in the `confirm` state can be processed.
+  - Prevents demoting the last Manager in the system.
+
+## 3. Extending Existing Models
+
+- **User (`res.users`):**
+  - Adds several `related` fields pointing to `employee_id` to display and allow editing of employee information from the "My Profile" form.
+  - Overrides the `write` method to enable two-way data synchronization with `hr.employee`.
+- **Settings (`res.config.settings`):**
+  - Adds the `auto_create_user_on_employee` (Boolean) field to save the system configuration to `ir.config_parameter`.

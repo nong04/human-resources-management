@@ -54,3 +54,62 @@
   - `base`: Module lõi của Odoo.
   - `mail`: Cung cấp tính năng chatter, activity và thông báo.
   - `resource`: Cung cấp model `resource.resource` để quản lý lịch làm việc.
+
+---
+
+# HR Management Module Documentation
+
+## 1. Introduction
+
+**HR Management** is a foundational module for Odoo 17, built to provide a centralized, flexible, and extensible human resources management system. This module acts as the "heart" of HR operations, managing core information about employees and the company's organizational structure.
+
+### Main Objectives:
+- **Data Centralization:** Store complete employee profiles, from contact information and job positions to personal details, in a single place.
+- **Organizational Chart Building:** Allow for the intuitive definition of the company structure through Departments and Job Positions.
+- **Flexible Permissions:** Provide a clear two-tier permission system (User and Manager), along with a transparent process for requesting and approving rights.
+- **Extensible Foundation:** Designed for easy integration and to serve as a base for more specialized HR modules such as Leave Management, Attendance, Payroll, and Recruitment.
+
+### Target Audience:
+- **HR Manager:** Manages all information, configures the system, and approves requests.
+- **Employee:** Views and updates their own personal information, and views public information of colleagues.
+- **Line Manager:** Views information of employees in their team.
+
+---
+
+## 2. Detailed Documentation
+
+To better understand the module, please refer to the detailed documents below:
+
+- ### **[Data Model](./data_model.md)**
+  > *For developers and system administrators.*
+  > 
+  > This document provides a deep dive into the technical structure of the module. It details the models (`hr.employee`, `hr.department`, etc.), important data fields, relationships (Many2one, One2many), and SQL constraints. This is essential documentation if you intend to customize or develop extensions based on this module.
+
+- ### **[User Guide](./user_guide.md)**
+  > *For end-users (Employees, Managers).*
+  > 
+  > Provides step-by-step instructions for the most common business processes, including:
+  > - **Process 1:** Adding and managing employee profiles.
+  > - **Process 2:** Setting up and adjusting the structure of departments and job positions.
+  > - **Process 3:** Submitting and approving requests for permission upgrades.
+  > 
+  > This document is presented as a series of concrete steps to help users quickly familiarize themselves with and master the module.
+
+- ### **[Detailed Features](./features.md)**
+  > *For those who want to understand the module's operational logic in depth.*
+  > 
+  > This document delves into "how" the features work, explaining the business logic hidden behind the user interface. Topics include:
+  > - The detailed permission system for Users and Managers.
+  > - The automatic data synchronization mechanism between Employees and Users.
+  > - Automation features like automatic user creation.
+  > - A list of rules and data constraints to ensure system integrity.
+
+---
+
+## 3. Installation and Dependencies
+
+- **Odoo Version:** 17.0
+- **Dependent Modules:**
+  - `base`: Odoo's core module.
+  - `mail`: Provides chatter, activity, and notification features.
+  - `resource`: Provides the `resource.resource` model for managing working schedules.

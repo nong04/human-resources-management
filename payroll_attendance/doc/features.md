@@ -82,3 +82,90 @@ Cung cấp một tiện ích chấm công nhanh chóng và tiện lợi cho nhâ
       - `payroll.attendance.record`: Chỉ có thể xem và quản lý (`create`/`write`) các bản ghi chấm công của chính mình.
       - `payroll.payslip`: Chỉ có thể xem phiếu lương của chính mình.
   - **Manager:** Có toàn quyền trên tất cả các model của module.
+
+---
+
+# Detailed Features - Payroll & Attendance
+
+This document explains in depth the features, business logic, and automation rules built into the **Payroll & Attendance** module.
+
+## 1. Comprehensive Salary Calculation Logic (`action_compute_sheet`)
+
+This is the core function that automates the detailed salary calculation for each employee.
+
+- **Mechanism:**
+  - When the "Compute Sheet" button is clicked, the system performs a complex series of calculation steps.
+- **How it works:**
+  1.  **Data Collection:**
+      - Gathers basic information: `base_salary`, `allowance`, working schedule (`resource_calendar_id`), timezone (`tz`) from the employee's profile.
+      - Fetches all attendance records (`payroll.attendance.record`) within the payroll period.
+      - Fetches all approved leave requests (`hr.leaves.request`) within the period.
+      - Fetches all public holidays (`hr.public.leaves`) and their salary multipliers (`public_leaves_rate`) within the period.
+      - Reads system configuration parameters (OT rate, tolerance, leave policies) from `ir.config_parameter`.
+  2.  **Hour Calculation:**
+      - **Standard Hours (`standard_work_hours`):** Calculates the total scheduled working hours for the period, excluding public holidays.
+      - **Hourly Wage (`hourly_wage`):** Calculated as `base_salary / standard_work_hours`.
+      - **Categorization of Actual Worked Hours:** Iterates through each attendance record, classifying worked hours into groups:
+          - `actual_worked_hours`: Hours worked on a normal working day.
+          - `overtime_hours`: Hours worked beyond the standard daily hours (after subtracting `overtime_tolerance`).
+          - `public_leaves_worked_hours`: Hours worked on a public holiday.
+  3.  **Handling Absences (Not Worked):**
+      - Iterates through approved leave days that have no corresponding attendance record.
+      - Classifies these leave hours into groups:
+          - `paid_leaves_hours`: Paid leave hours.
+          - `unpaid_leaves_hours`: Unpaid leave hours.
+  4.  **Applying Special Policies:**
+      - Applies policies (`policy_*`) from Settings to handle complex cases like "working on a leave day" (whether to count it as OT, whether to deduct the leave day).
+  5.  **Calculating Gross Salary (before adjustments):**
+      - `base_pay`: `(actual_worked_hours + paid_leaves_hours)` * `hourly_wage`.
+      - `overtime_pay`: `overtime_hours` * `hourly_wage` * `payroll_overtime_rate`.
+      - `public_leaves_pay`: `public_leaves_worked_hours` * `hourly_wage` * `public_leaves_rate`.
+      - `gross_salary_before_adjustments`: Sum of `base_pay`, `overtime_pay`, `public_leaves_pay`, and `allowance`.
+  6.  **Calculating Bonuses and Deductions:**
+      - Iterates through `payroll.payslip.line` records by `sequence`.
+      - Calculates the value of each line (`_calculate_amount`). Percentage-based rules are calculated on the current running gross total (after adding previous bonuses).
+      - Accumulates totals into `total_bonus` and `total_deduction`.
+  7.  **Calculating Net Salary (`net_salary`):**
+      - `net_salary` = `gross_salary_before_adjustments` + `total_bonus` + `total_deduction`.
+
+## 2. Payroll Management (`payroll.payroll`)
+
+This feature streamlines the monthly payroll process for multiple employees.
+
+- **Creation and Selection:** Allows creating a new Payroll, selecting employees by list (`employee`) or by department (`department`).
+- **Template Lines (`payroll.payroll.line`):** General bonus/deduction rules can be added for the entire Payroll (e.g., seniority bonus). When payslips are generated, these lines are automatically added to each individual payslip.
+- **Batch Actions:** Provides buttons to perform actions for all payslips within the Payroll:
+  - `Generate Payslips`: Creates payslips in the `draft` state.
+  - `Compute All`: Runs `action_compute_sheet` for all of them.
+  - `Confirm All`: Moves all to the `done` state.
+  - `Export Excel`: Exports an Excel report for the `done` payslips.
+
+## 3. Systray Attendance Integration
+
+Provides a quick and convenient attendance widget for employees.
+
+- **Mechanism:**
+  - A widget is added to the system tray (systray) using JavaScript.
+  - The status (`checked_in`/`checked_out`) is fetched from the backend via the `get_systray_info` method of `hr.employee`.
+- **Action:**
+  - When an employee clicks "Check In" / "Check Out", it calls the `action_manual_attendance` method on `hr.employee`.
+  - The backend creates or updates the corresponding `payroll.attendance.record` and returns the new status to update the UI.
+
+## 4. Multi-Currency Handling and Excel Export
+
+- **Multi-Currency:**
+  - **Storage:** All monetary calculations and storage in the backend (Monetary fields) are done in a base currency (defaulting to USD) to ensure consistency.
+  - **Display:** The user interface displays monetary values in a currency configurable in Settings (`payroll_currency_id`). The system automatically converts back and forth using Odoo's `_convert` method.
+- **Excel Export:**
+  - Uses a `Controller` (`/payroll/export/payslips`) to handle the HTTP request.
+  - Uses the `xlsxwriter` library to create an Excel file in memory, format the header, and populate it with data from the confirmed payslips.
+  - Returns the Excel file for the user to download with a dynamically generated filename.
+
+## 5. Permission System
+
+- **Two levels:** `User` (`group_payroll_user`) and `Manager` (`group_payroll_manager`).
+- **Record Rules:**
+  - **User:**
+      - `payroll.attendance.record`: Can only view and manage (`create`/`write`) their own attendance records.
+      - `payroll.payslip`: Can only view their own payslips.
+  - **Manager:** Has full rights on all models of the module.

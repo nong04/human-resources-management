@@ -76,3 +76,84 @@ Module xây dựng một quy trình phê duyệt rõ ràng và hệ thống phâ
   - Giúp quản lý có cái nhìn tổng thể về sự vắng mặt trong team và lên kế hoạch công việc hiệu quả.
 - **Bộ lọc Tìm kiếm:**
   - Giao diện danh sách yêu cầu nghỉ phép được trang bị các bộ lọc mặc định tiện lợi như "My Requests", "My Team's Requests", và "To Approve", giúp người dùng nhanh chóng tìm thấy thông tin cần thiết.
+
+---
+
+# Detailed Features - Leave Management
+
+This document describes in depth the features, business logic, and automation rules built into the **Leave Management** module.
+
+## 1. Intelligent Leave Duration Calculation Logic
+
+This is one of the core features of the module, ensuring leave days are calculated accurately and fairly.
+
+### 1.1. Automatic Exclusion of Non-Working Days
+
+- **Mechanism:**
+  - When an employee selects a "Start Date" and "End Date" in a leave request, the `duration` field is recalculated automatically.
+- **How it works (`_compute_duration`):**
+  1.  **Get Working Schedule:** The system retrieves the `resource_calendar_id` and `tz` (timezone) from the employee's profile. This schedule defines the working days and hours of the week.
+  2.  **Get Public Holidays:** The system calls the `get_public_leave_dates()` method from the `hr.public.leaves` model to get a list of all company-wide public holidays.
+  3.  **Calculation:** The system iterates through each day in the requested leave period and only counts the days that meet both conditions:
+      - It is a working day according to the employee's schedule (`_work_intervals_batch`).
+      - It is **not** a public holiday.
+- **Result:** The `duration` only reflects the actual number of working days the employee will be absent, completely excluding weekends and public holidays.
+
+### 1.2. Leave Balance Check
+
+The module ensures that employees cannot request more leave days than they have been allocated.
+
+- **Mechanism:**
+  - This logic is triggered when an employee clicks the "Submit" button (`action_confirm`) on a leave request for a leave type where `requires_allocation` = 'yes'.
+- **How it works (`_get_remaining_days`):**
+  1.  **Calculate Total Allocation:** The system finds all `approved` `hr.leaves.allocation` records for that employee, of the same leave type, and within the validity period, then sums their `duration`.
+  2.  **Calculate Total Taken:** The system finds all `approved` `hr.leaves.request` records for that employee, of the same leave type (excluding the current request), and sums their `duration`.
+  3.  **Comparison:** The system compares the currently requested days with `(Total Allocation - Total Taken)`. If the requested amount is greater, an error is displayed, and the request cannot be submitted.
+
+## 2. Approval Workflow & Permissions
+
+The module establishes a clear approval process and a flexible permission system.
+
+### 2.1. Approval Workflow
+
+- **Step 1: Submit Request (`action_confirm`):**
+  - When an employee clicks "Submit", the request's state changes from `draft` to `confirm`.
+  - The system automatically creates an "Activity" (`activity_schedule`) and assigns it to the employee's leave approver (`leaves_manager_id`). The approver will receive a notification in Odoo.
+- **Step 2: Approve/Refuse (`action_approve` / `action_refuse`):**
+  - The manager opens the request and clicks "Approve" or "Refuse".
+  - The request's state is updated accordingly, and the `approver_id` and `response` are recorded.
+  - The system automatically posts a message in the request's chatter (`message_post`), logging who approved/refused and when.
+  - The previously created "Activity" is marked as done (`activity_feedback`).
+
+### 2.2. Permission System
+
+- **Leave Approver (`leaves_manager_id`):**
+  - By default, an employee's leave approver is the user of their direct manager (`manager_id.user_id`).
+  - However, this field can be manually customized on the employee profile by an HR Manager, allowing another person (e.g., the head of HR) to approve leaves for a specific employee.
+- **Record Rules:**
+  - **User (`group_hr_leaves_user`):** Can only see requests/allocations where the `domain_force` is `['|', ('employee_id.user_id', '=', user.id), ('employee_id.leaves_manager_id', '=', user.id)]`. This allows mid-level managers to see their team's requests without needing system-wide Manager rights.
+  - **Manager (`group_hr_leaves_manager`):** Can see all requests/allocations across the entire company.
+- **Security Constraint:**
+  - The system prevents the demotion of the last manager in the system to avoid a situation where no one has administrative rights.
+
+### 2.3. Overlap Prevention
+
+- **Mechanism:**
+  - The `_check_overlapping_leaves` logic is triggered whenever a request is created or its state is changed to `approved`.
+- **How it works:**
+  - The system searches for other leave requests from the same employee that are already in the `approved` state and have an overlapping time period (`date_to >= date_from` and `date_from <= date_to`).
+  - If any overlap is found, the system raises an error and prevents the action.
+- **Purpose:** To ensure leave data is always accurate and there are no scheduling conflicts.
+
+## 3. Integration and User Experience
+
+- **Smart Button on Employee Form:**
+  - The module adds a "Leaves" smart button directly to the `hr.employee` form.
+  - This button displays the remaining leave days (`remaining_leaves`), calculated in real-time.
+  - It allows users and managers to quickly access an employee's leave history with a single click.
+- **Leave Overview Calendar (`hr.leaves.calendar`):**
+  - Provides a `Calendar View` accessible from the **Overview** menu.
+  - It displays both approved leave requests (colored by employee) and company-wide public holidays simultaneously.
+  - This helps managers get a holistic view of team absences and plan work effectively.
+- **Search Filters:**
+  - The leave request list view is equipped with convenient default filters like "My Requests", "My Team's Requests", and "To Approve", helping users quickly find the information they need.

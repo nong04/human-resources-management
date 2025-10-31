@@ -53,3 +53,61 @@
   - `hr_management`: Cung cấp dữ liệu nhân viên và cơ cấu tổ chức.
   - `hr_leaves`: Cung cấp dữ liệu nghỉ phép để tính toán lương.
   - `mail`: Cung cấp tính năng chatter, activity và thông báo.
+
+---
+
+# Payroll & Attendance Module Documentation
+
+## 1. Introduction
+
+**Payroll & Attendance** is a comprehensive module for Odoo 17, built to seamlessly integrate attendance tracking and basic salary calculation processes. This module extends the functionalities of **HR Management** and **Leave Management**, enabling businesses to track employees' actual working hours and automate the monthly payroll calculation.
+
+### Main Objectives:
+- **Attendance Integration:** Provide a system for recording check-in/check-out times and automatically calculating worked hours.
+- **Payroll Automation:** Build a robust payroll calculation process that automatically aggregates working hours, overtime, leaves, and bonuses/deductions to generate the final payslip.
+- **Batch Management:** Allow for the efficient creation and processing of payslips for multiple employees through "Payrolls".
+- **Flexibility and Customization:** Provide the ability to define bonus and deduction rules (fixed or percentage-based), along with various configurable payroll policies.
+- **Reporting and Data Export:** Support exporting payroll reports to professionally formatted Excel files.
+- **Multi-Currency Support:** Allow calculations and storage in a base currency (USD) while displaying in a different user-selected currency.
+
+### Integration:
+- This module requires the installation of and depends on **HR Management** and **HR Leaves** to use employee data, work schedules, and leave information.
+
+---
+
+## 2. Documentation Structure
+
+To better understand the module, please refer to the detailed documents below:
+
+- ### **[Data Model](./data_model.md)**
+  > *For developers and system administrators.*
+  > 
+  > Analyzes the technical structure of the module, including a UML class diagram, descriptions of models (`payroll.payslip`, `payroll.attendance.record`, etc.), the currency system, relationships, and logical constraints.
+
+- ### **[User Guide](./user_guide.md)**
+  > *For end-users (Employees, Payroll Accountants, Managers).*
+  > 
+  > Provides step-by-step instructions for key business processes:
+  > - **Process 1:** System configuration (salary, rules, policies).
+  > - **Process 2:** Daily employee attendance.
+  > - **Process 3:** Running monthly payroll.
+  > - **Process 4:** Viewing and exporting payslips.
+
+- ### **[Detailed Features](./features.md)**
+  > *For those who want to understand the module's operational logic in depth.*
+  > 
+  > Explains in detail "how" the core features work:
+  > - The detailed salary calculation logic (`action_compute_sheet`).
+  > - The multi-currency handling mechanism.
+  > - The batch processing and bulk payslip generation workflow.
+  - Integration of the attendance widget in the system tray (Systray).
+
+---
+
+## 3. Installation and Dependencies
+
+- **Odoo Version:** 17.0
+- **Dependent Modules:**
+  - `hr_management`: Provides employee data and organizational structure.
+  - `hr_leaves`: Provides leave data for salary calculations.
+  - `mail`: Provides chatter, activity, and notification features.

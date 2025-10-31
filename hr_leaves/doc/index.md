@@ -52,3 +52,60 @@
 - **Các module phụ thuộc:**
   - `hr_management`: Cung cấp dữ liệu nhân viên và cơ cấu tổ chức.
   - `mail`: Cung cấp tính năng chatter, activity và thông báo.
+
+---
+
+# Leave Management Module Documentation
+
+## 1. Introduction
+
+**Leave Management** is an extension module for Odoo 17, designed to comprehensively manage the leave process within a company. The module operates on the foundation of the **HR Management** module, allowing employees to submit leave requests, and managers to allocate and approve these requests systematically.
+
+### Main Objectives:
+- **Process Automation:** Provide a clear workflow from request creation, submission, to approval or refusal, integrated with Odoo's notification system (Activity).
+- **Leave Balance Management:** Automatically calculate and track the remaining leave days for employees for leave types that require allocation.
+- **Intelligent Calculation:** Automatically exclude weekends and company-wide public holidays when calculating leave duration, based on each employee's individual work schedule.
+- **Clear Permissions:** Ensure employees can only view and manage their own requests, while managers can review their team's requests.
+- **Data Visualization:** Provide an overview calendar that displays both employee leaves and company-wide public holidays.
+
+### Integration:
+- This module requires the **HR Management** module to be installed and is fully dependent on it for employee data and organizational structure.
+
+---
+
+## 2. Documentation Structure
+
+To better understand the module, please refer to the detailed documents below:
+
+- ### **[Data Model](./data_model.md)**
+  > *For developers and system administrators.*
+  > 
+  > Analyzes the technical structure of the module, including models (`hr.leaves.request`, `hr.leaves.allocation`, `hr.leaves.calendar` SQL View, etc.), data fields, relationships, and important logical constraints.
+
+- ### **[User Guide](./user_guide.md)**
+  > *For end-users (Employees, Managers).*
+  > 
+  > Provides step-by-step instructions for key business processes:
+  > - **Process 1:** Configuring leave types and public holidays.
+  > - **Process 2:** Allocating leave days to employees.
+  > - **Process 3:** Employee creates and submits a leave request.
+  > - **Process 4:** Manager approves or refuses a request.
+  > - **Process 5:** Viewing the company and team leave overview calendar.
+
+- ### **[Detailed Features](./features.md)**
+  > *For those who want to understand the module's operational logic in depth.*
+  > 
+  > Explains in detail "how" the core features work:
+  > - The permission system and data access rules (`Record Rules`).
+  > - The logic for calculating leave duration (excluding non-working days based on work schedules).
+  > - The mechanism for checking leave balances and preventing overlapping leaves.
+  > - Integration with Odoo's notification and activity system.
+
+---
+
+## 3. Installation and Dependencies
+
+- **Odoo Version:** 17.0
+- **Dependent Modules:**
+  - `hr_management`: Provides employee data and organizational structure.
+  - `mail`: Provides chatter, activity, and notification features.

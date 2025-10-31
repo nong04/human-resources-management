@@ -253,3 +253,261 @@ Quản lý việc tạo và xử lý phiếu lương hàng loạt. Kế thừa `
   - Thêm trường `public_leaves_rate` (Float) để định nghĩa hệ số nhân lương khi làm việc vào ngày lễ.
 - **Cài đặt (`res.config.settings`):**
   - Thêm các tham số cấu hình: `payroll_currency_id`, `overtime_tolerance`, `undertime_tolerance`, `payroll_overtime_rate`, và các chính sách nghỉ phép.
+
+---
+
+# Data Model - Payroll & Attendance
+
+This document provides a detailed analysis of the data structure of the **Payroll & Attendance** module, including models, fields, relationships, and logical constraints.
+
+## 1. UML Class Diagram
+
+The diagram below illustrates the object-oriented structure of the models in the module. It clearly shows important attributes (fields), methods, relationships, and inheritance.
+
+**Legend:**
+- `+` : Public attribute/method.
+- `-` : Private/protected attribute/method, typically `_compute`, `_check`, `_onchange` functions.
+- `<<Model>>`: Represents a standard Odoo model.
+- `<<Transient>>`: Represents a temporary Odoo model (`models.TransientModel`).
+- `(USD)`: Indicates a Monetary field stored in the base currency (USD).
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "HR Management Module" {
+    class "hr.employee" as HREmployee
+}
+
+package "HR Leaves Modules" {
+    class "hr.public_leaves" as HRPublicLeaves
+}
+
+package "Odoo Base Models" {
+    class "res.config.settings" as BaseConfig
+}
+
+package "Payroll & Attendance Module" {
+    class payroll_attendance_record <<Model>> {
+        + employee_id: Many2one
+        + check_in: Datetime
+        + check_out: Datetime
+        + worked_hours: Float
+        --
+        - _compute_worked_hours()
+        - _check_no_open_attendance()
+        - _check_validity()
+    }
+
+    class payroll_bonus_deduction <<Model>> {
+        + name: Char
+        + code: Char
+        + type: Selection
+        + computation_method: Selection
+        + amount_fixed: Monetary (USD)
+        + amount_percentage: Float
+        --
+        - _check_positive_values()
+    }
+
+    class payroll_payslip <<Model>> {
+        + employee_id: Many2one
+        + payroll_id: Many2one
+        + date_from: Date
+        + date_to: Date
+        + state: Selection
+        + line_ids: One2many
+        --
+        + hourly_wage: Monetary (USD)
+        + base_pay: Monetary (USD)
+        + overtime_pay: Monetary (USD)
+        + net_salary: Monetary (USD)
+        --
+        - _compute_name()
+        - _compute_currency_display()
+        - _compute_adjustments()
+        - _compute_net_salary()
+        - _check_overlapping_payslips()
+        + action_compute_sheet()
+        + action_set_to_done()
+    }
+
+    class payroll_payslip_line <<Model>> {
+        + slip_id: Many2one
+        + rule_id: Many2one
+        + quantity: Float
+        + amount: Monetary (USD)
+        --
+        - _calculate_amount()
+    }
+
+    class payroll_payroll <<Model>> {
+        + name: Char
+        + date_from: Date
+        + date_to: Date
+        + state: Selection
+        + slip_ids: One2many
+        + line_ids: One2many
+        --
+        - _compute_payslip_count()
+        + action_generate_payslips()
+        + action_compute_all_sheets()
+        + action_confirm_all()
+        + action_export_excel()
+    }
+    
+    class payroll_payroll_line <<Model>> {
+        + payroll_id: Many2one
+        + rule_id: Many2one
+        + quantity: Float
+    }
+
+    class hr_employee_ext <<Extension>> {
+        + base_salary: Monetary (USD)
+        + allowance: Monetary (USD)
+        + payroll_access_level: Selection
+    }
+
+    class hr_public_leaves_ext <<Extension>> {
+        + public_leaves_rate: Float
+    }
+    
+    class res_config_settings <<Transient>> {
+        + payroll_currency_id: Many2one
+        + overtime_tolerance: Integer
+        + payroll_overtime_rate: Float
+        + policy_paid_leave_allow_work: Boolean
+    }
+}
+
+' Relationships
+payroll_attendance_record "n" -- "1" HREmployee : employee_id >
+payroll_payslip "n" -- "1" HREmployee : employee_id >
+payroll_payslip "n" -- "0..1" payroll_payroll : payroll_id >
+payroll_payslip "1" -- "n" payroll_payslip_line : line_ids
+payroll_payroll "1" -- "n" payroll_payslip : slip_ids
+payroll_payroll "1" -- "n" payroll_payroll_line : line_ids
+payroll_payslip_line "n" -- "1" payroll_bonus_deduction : rule_id >
+payroll_payroll_line "n" -- "1" payroll_bonus_deduction : rule_id >
+
+' Inheritance / Extension
+hr_employee_ext ..|> HREmployee : <<inherits>>
+res_config_settings ..|> BaseConfig : <<inherits>>
+hr_public_leaves_ext ..|> HRPublicLeaves : <<inherits>>
+@enduml
+```
+
+## 2. Detailed Model Descriptions
+
+### 2.1. Attendance Record (`payroll.attendance.record`)
+Stores employee check-in and check-out records.
+
+- **Data Fields:**
+  - `employee_id` (Many2one -> `hr.employee`): The employee.
+  - `check_in`, `check_out` (Datetime): Check-in and check-out times.
+  - `worked_hours` (Float): Number of hours worked (computed, store=True).
+- **Methods & Logic Constraints:**
+  - `_compute_worked_hours`: Calculates `worked_hours` when `check_out` is filled.
+  - `_check_no_open_attendance`: Prevents an employee from checking in while they still have an open attendance record.
+  - `_check_validity`: `check_out` must be after `check_in`.
+
+### 2.2. Bonus/Deduction Rule (`payroll.bonus.deduction`)
+Defines salary calculation rules.
+
+- **Data Fields:**
+  - `name`, `code` (Char): Name and identifier.
+  - `sequence` (Integer): Priority order for computation.
+  - `type` (Selection): `bonus` (addition) or `deduction` (subtraction).
+  - `computation_method` (Selection): `fixed` amount or `percentage` of gross salary.
+  - `currency_id` (Many2one -> `res.currency`): Technical field, always USD.
+  - `currency_display_id` (Many2one -> `res.currency`): Display currency, from settings.
+  - `amount_fixed` (Monetary): Fixed amount (stored in USD).
+  - `amount_percentage` (Float): Percentage rate.
+  - `amount_fixed_display` (Monetary): Fixed amount (displayed in `currency_display_id`).
+- **Methods & Logic Constraints:**
+  - `_check_positive_values`: `amount` values cannot be negative.
+  - `_compute_currency`, `_compute_currency_display`: Fetch currency information.
+  - `_compute_amount_fixed_display`, `_inverse_amount_fixed_display`: Convert values between the USD storage field and the display field.
+
+### 2.3. Payslip (`payroll.payslip`)
+The central model, containing all salary information for an employee for a period. Inherits `mail.thread` and `mail.activity.mixin`.
+
+- **Data Fields:**
+  - **General Info:** `name`, `employee_id`, `date_from`, `date_to`, `state` (`draft`, `done`), `payroll_id` (Payroll).
+  - **Reference Info:** `identification_id`, `department_id`, `resource_calendar_id`.
+  - **Worked Hours (Computed):**
+    - `standard_work_hours`: Standard working hours in the period.
+    - `actual_worked_hours`: Actual worked hours (excluding OT, holidays).
+    - `paid_leaves_hours`: Paid leave hours (not worked).
+    - `overtime_hours`: Overtime hours.
+    - `public_leaves_worked_hours`: Hours worked on public holidays.
+    - `unpaid_leaves_hours`: Unpaid leave hours (not worked).
+  - **Storage Fields (Computed in USD):**
+    - `currency_id` (Many2one): Always USD.
+    - `hourly_wage`: Hourly wage rate.
+    - `base_pay`: Base pay based on actual worked hours and paid leave hours.
+    - `overtime_pay`: Overtime pay.
+    - `public_leaves_pay`: Pay for working on public holidays.
+    - `allowance`: Allowance.
+    - `total_bonus`, `total_deduction`: Total bonus/deduction from `line_ids`.
+    - `gross_salary_before_adjustments`: Gross salary before adjustments.
+    - `net_salary`: Net salary.
+  - **Display Fields (in Configured Currency):**
+    - `currency_display_id` (Many2one): The display currency.
+    - `hourly_wage_display`, `base_pay_display`, `overtime_pay_display`, `public_leaves_pay_display`, `allowance_display`, `total_bonus_display`, `total_deduction_display`, `gross_salary_display`, `net_salary_display`.
+  - **Details:** `line_ids` (One2many -> `payroll.payslip.line`).
+- **Methods & Logic Constraints:**
+  - `_check_dates`, `_check_employee_contract_dates`, `_check_overlapping_payslips`: Data validity constraints.
+  - `_compute_name`, `_compute_currency_display`, `_compute_display_fields`, `_compute_adjustments`, `_compute_gross_salary`, `_compute_net_salary`: Automatic computation functions.
+  - `action_compute_sheet`: The main method to execute the entire salary calculation logic.
+  - `action_set_to_done`, `action_reset_to_draft`: State-changing actions.
+
+### 2.4. Payslip Line (`payroll.payslip.line`)
+Details the bonus/deduction items on a payslip.
+
+- **Data Fields:**
+  - `slip_id` (Many2one -> `payroll.payslip`): Link to the payslip.
+  - `rule_id` (Many2one -> `payroll.bonus.deduction`): The applied rule.
+  - `sequence` (Integer): Computation order (related from `rule_id`).
+  - `quantity` (Float): Applied quantity/factor.
+  - `currency_id` (Many2one): Always USD (related from `slip_id`).
+  - `currency_display_id` (Many2one): Display currency (related from `slip_id`).
+  - `amount` (Monetary): Computed amount (stored in USD).
+  - `amount_display` (Monetary): Amount (displayed in `currency_display_id`).
+- **Methods & Logic Constraints:**
+  - `_calculate_amount`: Calculates the `amount` value based on the rule and current gross salary.
+  - `_compute_amount_display`: Converts the `amount` to the display currency.
+
+### 2.5. Payroll (`payroll.payroll`)
+Manages the creation and processing of payslips in batches. Inherits `mail.thread` and `mail.activity.mixin`.
+
+- **Data Fields:**
+  - `name`, `date_from`, `date_to`, `state` (`draft`, `generated`, `done`).
+  - `slip_ids` (One2many -> `payroll.payslip`): List of generated payslips.
+  - `payslip_count` (Integer): Number of payslips (computed).
+  - `selection_mode` (Selection): `employee` (by employee) or `department` (by department).
+  - `employee_ids`, `department_ids` (Many2many): List of selected employees/departments.
+  - `line_ids` (One2many -> `payroll.payroll.line`): Template bonus/deduction lines for the entire batch.
+- **Methods & Logic Constraints:**
+  - `_check_dates`: `date_from` must be before `date_to`.
+  - `action_generate_payslips`, `action_compute_all_sheets`, `action_confirm_all`, `action_reset_to_draft`, `action_export_excel`, `action_view_payslips`: Main actions on the batch.
+
+### 2.6. Payroll Line (`payroll.payroll.line`)
+Defines template bonus/deduction lines for a Payroll.
+
+- **Data Fields:**
+  - `payroll_id` (Many2one -> `payroll.payroll`): Link to the Payroll.
+  - `rule_id` (Many2one -> `payroll.bonus.deduction`): The template rule.
+  - `quantity` (Float): The template quantity/factor.
+
+### 2.7. Extending Existing Models
+- **Employee (`hr.employee`):**
+  - Adds `base_salary`, `allowance` (Monetary, USD) and their corresponding `_display` fields.
+  - Adds `payroll_access_level` to manage permissions.
+  - Adds `get_systray_info` and `action_manual_attendance` methods for the attendance systray widget.
+  - `_check_positive_salary`: Salary and allowance cannot be negative.
+- **Public Holiday (`hr.public.leaves`):**
+  - Adds `public_leaves_rate` (Float) field to define the salary multiplier for working on a holiday.
+- **Settings (`res.config.settings`):**
+  - Adds configuration parameters: `payroll_currency_id`, `overtime_tolerance`, `undertime_tolerance`, `payroll_overtime_rate`, and leave policies.

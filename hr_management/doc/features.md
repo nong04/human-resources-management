@@ -78,3 +78,86 @@ Hệ thống phân quyền được thiết kế rõ ràng để kiểm soát qu
   - **Hành động:** Thay đổi `description` của menu "Preferences" thành "My Profile" và điều hướng người dùng đến một form view tùy chỉnh của `res.users` đã được thiết kế lại để thân thiện hơn.
 - **Form View Nhân viên:**
   - **Trường `is_manager` và `is_self`:** Đây là các trường `compute` không lưu trữ, được tính toán dựa trên quyền và ID của người dùng hiện tại. Chúng được dùng để điều khiển thuộc tính `readonly` và `invisible` trên giao diện XML, giúp ẩn/hiện hoặc cho/không cho phép sửa các trường tùy theo ngữ cảnh. Ví dụ, một nhân viên chỉ có thể sửa các trường thông tin cá nhân của chính mình.
+
+---
+
+# Detailed Features - HR Management
+
+This document describes in depth the features, business logic, and automation rules built into the **HR Management** module.
+
+## 1. Employee Management (`hr.employee`)
+
+This is the central object of the module, designed to store a 360-degree HR profile.
+
+### 1.1. Synchronization with User (`res.users`)
+
+This feature creates a strong link between the employee profile and the system login account.
+
+- **Mechanism:**
+  - Uses `related` fields on the `res.users` model to map to fields on `hr.employee`.
+  - Overrides the `create` and `write` methods on both models to ensure data consistency.
+- **Data Flow:**
+  - **From Employee -> User:** When an HR Manager updates an employee's name, work email, or profile picture, the corresponding information on the user account is automatically updated.
+  - **From User -> Employee (My Profile):** When a user updates their personal information via the "My Profile" menu, the corresponding fields in their `hr.employee` profile are also updated. This empowers employees to manage their own information.
+- **Benefits:** Minimizes duplicate data entry and ensures data consistency across the system.
+
+### 1.2. Automation & Constraints
+
+To ensure data integrity and accuracy, the module integrates several automatic rules.
+
+- **Auto-Create User:**
+  - **Activation:** At `HR Management > Configuration > Settings > Auto-Create User`.
+  - **Logic:** When a new `hr.employee` record is created with a `Work Email`, the system checks if a `user_id` already exists. If not, a new `res.users` account is automatically created with the `login` as the `work_email` and assigned to the default `User` group.
+  - **Purpose:** Simplifies the onboarding process, helping new employees quickly get an account to access the system.
+
+- **Data Constraints (`@api.constrains`):**
+  - `_check_birthday`: The date of birth cannot be in the future.
+  - `_check_manager_coach`: An employee cannot be their own manager or coach.
+  - `_check_work_dates`: The employment end date must be on or after the start date.
+  - `_sql_constraints`: Ensures `work_email` and `user_id` are unique across the entire `hr_employee` table.
+
+## 2. Organizational Structure Management
+
+The module allows for flexible modeling of the company structure.
+
+- **Department (`hr.department`):**
+  - **Tree Structure:** Uses `parent_id` and `child_ids` to create a parent-child relationship, allowing for the construction of a multi-level organizational chart.
+  - **Recursion Constraint:** Prevents users from creating loops (e.g., Department A is a child of Department B, and Department B is a child of Department A).
+- **Job Position (`hr.job`):**
+  - **Uniqueness:** The job position name must be unique within the same department to avoid confusion.
+- **Smart Buttons:**
+  - The `hr.department` model has smart buttons that display the number of related employees. Clicking them automatically navigates to the list of those employees, helping users quickly access related data.
+
+## 3. Permission and Access System
+
+The permission system is clearly designed to control access and secure information.
+
+### 3.1. User Groups
+
+- **User (`group_hr_management_user`):**
+  - **Permissions:** The most basic permission group. Users in this group can view public information of other employees and edit their own personal information. They cannot create or delete employees.
+  - **Purpose:** Intended for all employees in the company.
+- **Manager (`group_hr_management_manager`):**
+  - **Permissions:** Inherits all permissions from the User group and has full CRUD (Create, Read, Update, Delete) rights on the `hr.employee`, `hr.department`, and `hr.job` models.
+  - **Purpose:** Intended for the HR department or managers responsible for managing HR data.
+
+### 3.2. Access Request Workflow (`hr.access.request`)
+
+This is a business process built to manage permission upgrades transparently.
+
+- **Logic:**
+  1.  An employee (who already has a user account) creates a new `hr.access.request` record.
+  2.  The system checks to ensure there are no other pending requests for this employee.
+  3.  The request is moved to the `confirm` state.
+  4.  A Manager is notified and reviews the request.
+  5.  Upon **Approve**, the system automatically writes to `res.groups` to add the employee's user to the `group_hr_management_manager` group.
+- **Security Constraint:**
+  - The system prevents the demotion of the last manager in the system to avoid a situation where no one has administrative rights.
+
+## 4. UI/UX Enhancements
+
+- **"My Profile" Menu:**
+  - **Mechanism:** Overrides Odoo's default `user_menuitems` using JavaScript.
+  - **Action:** Changes the `description` of the "Preferences" menu to "My Profile" and directs the user to a custom `res.users` form view redesigned to be more user-friendly.
+- **Employee Form View:**
+  - **`is_manager` and `is_self` fields:** These are non-stored `compute` fields, calculated based on the current user's permissions and ID. They are used to control `readonly` and `invisible` attributes in the XML view, hiding/showing or allowing/disallowing edits to fields based on the context. For example, an employee can only edit their own personal information fields.
